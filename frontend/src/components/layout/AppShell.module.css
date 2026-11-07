@@ -1,0 +1,11 @@
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.main {
+  flex: 999 1 560px;
+  min-width: 0;
+  padding: 40px var(--page-pad);
+}

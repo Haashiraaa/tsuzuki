@@ -1,0 +1,40 @@
+/* Design tokens, taken from the approved mockup. Change a colour or size here, nowhere else. */
+:root {
+  --bg: #121110;
+  --sidebar: #171614;
+  --panel: #1a1917;
+  --panel-soft: #1e1c1a;
+  --raised: #2a2724;
+  --selected: #2a211d;
+  --border: #2f2c28;
+  --border-input: #3a3631;
+  --divider: #2a2724;
+  --track: #2e2b28;
+
+  --text: #f3efe9;
+  --text-soft: #d8d2c8;
+  --text-dim: #b5aea4;
+  --muted: #a59e94;
+  --faint: #8f887e;
+  --placeholder: #938c82;
+
+  --accent: #ff7a59;
+  --accent-text: #ff8e70;
+  --accent-hover: #ffb09b;
+  --on-accent: #1a0f0b;
+
+  --ok: #6fd3a8;
+  --ok-bg: #16221d;
+  --on-ok: #0e1a15;
+  --warn: #f0c15a;
+
+  --font-ui: "Inter Variable", Inter, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Space Grotesk", Inter, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+  --radius-small: 10px;
+
+  --page-pad: clamp(20px, 4vw, 56px);
+}

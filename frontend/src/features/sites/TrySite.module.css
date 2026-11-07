@@ -1,0 +1,41 @@
+.panel {
+  flex: 1 1 420px;
+  min-width: 0;
+  gap: 18px;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.caption {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.save {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.where {
+  flex: 1 1 200px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.path {
+  font-family: var(--font-mono);
+}

@@ -1,0 +1,19 @@
+.status {
+  font-weight: 500;
+}
+
+.accent {
+  color: var(--accent-text);
+}
+
+.ok {
+  color: var(--ok);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.muted {
+  color: var(--muted);
+}

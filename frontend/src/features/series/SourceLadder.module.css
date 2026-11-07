@@ -1,0 +1,47 @@
+.aside {
+  flex: 1 1 280px;
+}
+
+.intro {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rung {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rung svg {
+  margin-top: 1px;
+}
+
+.dim {
+  color: var(--muted);
+}
+
+.text {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.dim .title {
+  color: var(--text-soft);
+}
+
+.ok {
+  color: var(--ok);
+}

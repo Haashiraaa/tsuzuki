@@ -1,0 +1,18 @@
+.footer {
+  padding: 14px 20px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-text);
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--accent-hover);
+}

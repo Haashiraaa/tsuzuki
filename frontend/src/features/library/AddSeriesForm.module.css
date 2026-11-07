@@ -1,0 +1,17 @@
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hint {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}

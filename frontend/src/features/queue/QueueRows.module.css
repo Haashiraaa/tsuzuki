@@ -1,0 +1,46 @@
+/* Rows shared by the "waiting and failed" and "finished" lists. */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 20px;
+}
+
+.text {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.note {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.warn {
+  font-size: 13px;
+  color: var(--warn);
+}
+
+.saved {
+  font-size: 13px;
+  color: var(--ok);
+}
+
+.row .retry {
+  padding: 0 18px;
+  font-weight: 600;
+}
+
+.empty {
+  font-size: 15px;
+  color: var(--muted);
+}

@@ -150,6 +150,28 @@ jobs:
           print("ok", tsuzuki.__version__)
           PY
 
+  frontend:
+    name: Frontend (types and build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - name: Types
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+
   commit-style:
     # Advisory only: it warns, it never fails. The changelog is written from commit messages,
     # and a message that is not in the usual `type: summary` form is silently left out of it.
@@ -167,7 +189,7 @@ jobs:
     # The one check to require on `main`. The test matrix changes between the full and the
     # reduced version, so its individual jobs can't be required by name.
     name: ci-ok
-    needs: [quality, test, build]
+    needs: [quality, test, build, frontend]
     if: always()
     runs-on: ubuntu-24.04
     steps:

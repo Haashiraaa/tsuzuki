@@ -1,0 +1,30 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+}
+
+.card {
+  background: var(--panel);
+}
+
+.soft {
+  background: var(--panel-soft);
+}
+
+.list {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.list > * {
+  border-bottom: 1px solid var(--divider);
+}
+
+.list > *:last-child {
+  border-bottom: 0;
+}
