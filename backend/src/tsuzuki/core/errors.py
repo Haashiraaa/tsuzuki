@@ -25,6 +25,14 @@ class ParseError(TsuzukiError):
     retryable = True
 
 
+class StorageError(TsuzukiError):
+    """The local database could not be opened, migrated or updated."""
+
+
+class InvalidTransitionError(StorageError):
+    """An episode was asked to move to a status it cannot reach from where it is."""
+
+
 class DownloadError(TsuzukiError):
     """A download failed or produced an incomplete file."""
 

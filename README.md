@@ -1,7 +1,7 @@
 # Tsuzuki
 
 Tsuzuki (続き, "to be continued") is a personal command-line tool for downloading anime episodes.
-Sites are plug-in adapters, so supporting a new one means adding a folder under `src/tsuzuki/sites/`.
+Sites are plug-in adapters, so supporting a new one means adding a folder under `backend/src/tsuzuki/sites/`.
 Currently supported: AnimeHeaven.
 
 ## Install
@@ -51,21 +51,35 @@ JSON lines to `<root>/logs/errors_log.jsonl`. Run with `-d` to see which root wa
 ## Layout
 
 ```
-src/tsuzuki/
+backend/src/tsuzuki/
     cli/         argument parsing, terminal output, wiring (the only place that prints or exits)
     core/        models, selection, retry, events, report, root folder, and the runner
     sites/       one folder per site + the registry; each site = fetch pages + pure parsing
     download/    aria2c, built-in streaming (resumable), skip-if-complete, and the chooser
     net/         HTTP helpers (timeouts, default headers, error translation), URL helpers
+    storage/     SQLite: series, episodes and what became of each download (see below)
+tests/           mirrors backend/src/tsuzuki: tests/storage tests tsuzuki.storage, and so on
 scripts/
     probe_ytdlp.py   check whether yt-dlp can handle a site (run locally)
 ```
 
 `core/` never prints, parses arguments or exits, so a web front-end can drive the same runner.
 
+## Storage
+
+One SQLite file, `<root>/tsuzuki.db`, using only Python's built-in `sqlite3` (no ORM, no Alembic).
+The schema is versioned with SQLite's own `user_version` and numbered files in
+`backend/src/tsuzuki/storage/migrations/`; add a new `NNNN_name.sql` to change it and never edit
+one that has been released.
+
+An episode moves through `available -> queued -> downloading -> ready -> delivered`
+(or `expired`, or `failed`; the last three can be queued again). The server keeps a finished file
+only until it reaches a device or its time runs out, then deletes the file and keeps the row, so a
+download stays on record without filling the disk. See `storage/lifecycle.py`.
+
 ## Adding a site
 
-1. Create `src/tsuzuki/sites/<name>/` with a `parsing.py` (pure HTML-to-data functions) and a
+1. Create `backend/src/tsuzuki/sites/<name>/` with a `parsing.py` (pure HTML-to-data functions) and a
    `site.py` with a class implementing `Site` (`fetch_series`, `resolve_media`) and an `ENTRY`.
 2. Add the `ENTRY` to the list in `sites/registry.py`.
 
@@ -74,6 +88,7 @@ scripts/
 ```bash
 pip install -e ".[dev]"
 ruff check . && ruff format --check . && pyright
+pytest
 ```
 
 Commit messages use [Conventional Commits](https://www.conventionalcommits.org/)
