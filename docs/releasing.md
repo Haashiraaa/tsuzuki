@@ -9,6 +9,11 @@ version or run `git tag` by hand. What drives it all is the **commit message**.
 
 ## How it works
 
+> **Merge pull requests with "Squash and merge", never "Create a merge commit".** release-please
+> reads the commit subject on `main`. A merge commit is titled `Merge pull request #N ...`,
+> which it cannot parse, so it sees no releasable change and opens no release pull request.
+> With a squash merge the subject is the pull request title (`feat: ...`).
+
 Releases happen **only from `main`**.
 
 1. Work is merged into `main` with commit messages in
@@ -101,6 +106,10 @@ Full matrix (Ubuntu, macOS, Windows × Python 3.10-3.14) runs on `main` and on p
 - **A release was tagged by mistake:** delete the GitHub Release and the tag, then fix the
   version in `.release-please-manifest.json` by hand in a normal pull request.
 - **The Release workflow fails with a permissions error:** setup step 1 or 2 was missed.
+- **No release pull request appeared after a merge:** check the Release run's log for
+  `commit could not be parsed`. It means the pull request was merged with a merge commit. Add the
+  `BEGIN_COMMIT_OVERRIDE` block (below) to that pull request's description, then re-run the Release
+  workflow (Actions -> Release -> Run workflow).
 - **The changelog is missing a change:** its commit message was not in conventional form, or it
   is a hidden type (`chore`, `test`, ...).
 - **A pull request was squash-merged with a non-conventional title, so no release appeared:**
