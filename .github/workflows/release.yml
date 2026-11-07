@@ -1,67 +1,66 @@
-
 name: Release
 
-# Runs on every push to main. Only actually releases if the version in
-# pyproject.toml doesn't already have a matching git tag — i.e. you bumped it.
+# Keeps ONE open pull request called "chore(main): release X.Y.Z" up to date. It holds the new
+# CHANGELOG.md entry and the version bump. Merging that pull request is what creates the tag
+# (vX.Y.Z) and the GitHub Release, and then the built wheel and sdist are attached to it.
+# Nothing is tagged or released until a person merges that pull request.
+#
+# The release pull request is opened with a personal access token (secret RELEASE_PLEASE_TOKEN),
+# because pull requests opened with the default token do not start CI, and then the required
+# check `ci-ok` would never appear on it. Without that secret this still works, but CI will not
+# run on the release pull request. See docs/releasing.md.
 on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
-  check-version:
-    runs-on: ubuntu-latest
+  release-please:
+    # Releases come from main only. The trigger above already limits this to pushes to main;
+    # this guard keeps it true if someone later adds workflow_dispatch or more branches.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     outputs:
-      version: ${{ steps.get_version.outputs.version }}
-      should_release: ${{ steps.check.outputs.should_release }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - id: release
+        uses: googleapis/release-please-action@v4
         with:
-          python-version: "3.12"
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
-      - name: Read version from pyproject.toml
-        id: get_version
-        run: |
-          VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])")
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Check if this version was already released
-        id: check
-        run: |
-          VERSION="${{ steps.get_version.outputs.version }}"
-          if git ls-remote --tags origin | grep -qE "refs/tags/v${VERSION}$"; then
-            echo "v$VERSION already tagged — skipping release."
-            echo "should_release=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "v$VERSION is new — will release."
-            echo "should_release=true" >> "$GITHUB_OUTPUT"
-          fi
-
-  build-and-release:
-    needs: check-version
-    if: needs.check-version.outputs.should_release == 'true'
-    runs-on: ubuntu-latest
+  attach-build:
+    # Runs only in the run where the release pull request was merged and a release was created.
+    name: Attach wheel and sdist to the release
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
-      contents: write  # required to create the tag + release
+      contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install build tooling
-        run: pip install build
+      - name: Build and validate
+        run: |
+          pip install build twine
+          python -m build
+          twine check --strict dist/*
 
-      - name: Build sdist + wheel
-        run: python -m build
-
-      - name: Create tag + GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ needs.check-version.outputs.version }}
-          target_commitish: ${{ github.sha }}
-          files: dist/*
-          generate_release_notes: true
-          fail_on_unmatched_files: true
+      - name: Upload to the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: gh release upload "$TAG" dist/* --clobber
