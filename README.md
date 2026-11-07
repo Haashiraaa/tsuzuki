@@ -1,126 +1,77 @@
+# Tsuzuki
 
-# anime-downloader
+Tsuzuki (続き, "to be continued") is a personal command-line tool for downloading anime episodes.
+Sites are plug-in adapters, so supporting a new one means adding a folder under `src/tsuzuki/sites/`.
+Currently supported: AnimeHeaven.
 
-A command-line tool for downloading anime episodes from AnimeHeaven. Supports parallel downloads, retry logic, and flexible episode filtering.
-
----
-
-## Requirements
-
-- Python 3.10+
-- aria2c (optional but recommended for faster, parallel downloads — a per-OS install hint is printed if it's missing)
-- Dependencies are managed via `pyproject.toml`
-
----
-
-## Installation
-
-Clone the repository and install in editable mode:
+## Install
 
 ```bash
-git clone https://github.com/Haashiraaa/anime-downloader
-cd anime-downloader
+git clone https://github.com/Haashiraaa/tsuzuki
+cd tsuzuki
 pip install -e .
 ```
 
-This installs the `anime` console script and pulls in all dependencies automatically.
-
----
+Dependencies are declared in `pyproject.toml` only. aria2c is optional but recommended
+(parallel, multi-connection downloads); a per-OS install hint is printed if it's missing.
 
 ## Usage
 
 ```bash
-anime --urls "https://animeheaven.me/anime.php?9rp26"
+tsuzuki --urls "https://animeheaven.me/anime.php?9rp26"
+python -m tsuzuki --urls "..."      # same thing
 ```
 
-Alternatively, without installing the console script:
+| Flag | Meaning |
+|------|---------|
+| `--urls URL [URL ...]` | series page URLs (required) |
+| `--episode N` | download one episode by number |
+| `--limit N` | download only N episodes (newest by default) |
+| `--oldest` | with `--limit`: take the oldest instead |
+| `--workers N` | parallel downloads when aria2c is installed (default 3) |
+| `--retries N` | attempts per network step (default 5) |
+| `-o, --output DIR` | root folder for `Downloads/` and `logs/` |
+| `-d, --debug` | verbose logging |
+
+`--episode` and `--limit` can't be combined. Exit code is 0 when everything succeeded,
+1 if anything failed, 130 if interrupted.
+
+## Where files go
+
+The root folder is chosen in this order, and the first that applies wins:
+
+1. `--output DIR`
+2. the `TSUZUKI_HOME` environment variable
+3. the project folder (found by name with haashi's `get_ancestor_by_name`, so it works from a git clone)
+4. `~/tsuzuki`
+
+Downloads go to `<root>/Downloads/<series>/episode_<n>.mp4`; unexpected errors are logged as
+JSON lines to `<root>/logs/errors_log.jsonl`. Run with `-d` to see which root was picked.
+
+## Layout
+
+```
+src/tsuzuki/
+    cli/         argument parsing, terminal output, wiring (the only place that prints or exits)
+    core/        models, selection, retry, events, report, root folder, and the runner
+    sites/       one folder per site + the registry; each site = fetch pages + pure parsing
+    download/    aria2c, built-in streaming (resumable), skip-if-complete, and the chooser
+    net/         HTTP helpers (timeouts, default headers, error translation), URL helpers
+scripts/
+    probe_ytdlp.py   check whether yt-dlp can handle a site (run locally)
+```
+
+`core/` never prints, parses arguments or exits, so a web front-end can drive the same runner.
+
+## Adding a site
+
+1. Create `src/tsuzuki/sites/<name>/` with a `parsing.py` (pure HTML-to-data functions) and a
+   `site.py` with a class implementing `Site` (`fetch_series`, `resolve_media`) and an `ENTRY`.
+2. Add the `ENTRY` to the list in `sites/registry.py`.
+
+## Development
 
 ```bash
-python3 -m app --urls "https://animeheaven.me/anime.php?9rp26"
+pip install -e ".[dev]"
+ruff check . && pyright
 ```
-
-### Options
-
-| Flag | Description |
-|------|-------------|
-| `--urls` | One or more anime page URLs (required) |
-| `--limit N` | Download only N episodes |
-| `--oldest` | Download oldest episodes first (default is newest) |
-| `--episode N` | Download a specific episode by number |
-| `--workers N` | Number of concurrent download workers (default: 3) |
-| `-d, --debug` | Enable debug logging |
-
-### Examples
-
-```bash
-# Download all episodes
-anime --urls "url"
-
-# Download multiple anime at once
-anime --urls "url1" "url2" "url3"
-
-# Download 3 newest episodes
-anime --urls "..." --limit 3
-
-# Download 3 oldest episodes
-anime --urls "..." --limit 3 --oldest
-
-# Download episode 5 only
-anime --urls "..." --episode 5
-
-# Enable debug output
-anime --urls "..." --debug
-```
-
----
-
-## Project Structure
-
-```
-app/
-    __main__.py           # Entry point — `python3 -m app`
-src/
-    main.py                # main() — parses args, runs the download pipeline
-    helpers/
-        cli.py              # Argument parsing
-        retry.py            # Retry logic with exponential backoff
-        hint.py              # OS-aware aria2c install hint
-    scrapers/
-        animeheaven.py      # AnimeHeavenScraper — scrapes episodes and video URLs
-    tools/
-        factory.py          # Picks aria2c or requests, with fallback on failure
-        downloaders/
-            base.py           # BaseDownloader ABC
-            aria2.py          # Aria2Downloader — parallel, 16 connections
-            req.py            # RequestsDownloader — chunked streaming, resume-capable
-        handlers/
-            downloads.py      # run_downloads / download_anime / download_factory
-            episode.py        # filter_episodes / download_episode
-    exceptions/
-        errors.py            # Base exception type
-```
-
-Downloads are saved to `Downloads/` at the project root, organized by anime title.
-
----
-
-## Dependencies
-
-- `requests` — HTTP requests
-- `beautifulsoup4` — HTML parsing
-- `lxml` — HTML parser backend
-- `tqdm` — download progress bars
-- `haashi` — utility library (logger, file handler, screen utilities)
-
-Dev dependencies (`pip install -e ".[dev]"`): `ruff`, `pyright`, `autopep8`, `pytest`, `pytest-cov`, `build`.
-
----
-
-## Notes
-
-- aria2c is used for downloads when available, with a requests fallback if it's missing or fails mid-download
-- If aria2c isn't installed, downloads run sequentially with a progress bar, and an OS-specific install hint (apt/pacman/dnf/brew/winget/choco) is printed
-- If aria2c is installed, downloads run in parallel using a thread pool (default 3 workers, configurable with `--workers`)
-- Failed network calls are retried up to 10 times with exponential backoff
-- Partial downloads (via the requests fallback) are resumed automatically on retry rather than restarting from scratch
-- Anime titles are sanitized before being used as folder names to ensure cross-platform compatibility
