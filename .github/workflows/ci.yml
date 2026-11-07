@@ -1,29 +1,175 @@
 name: CI
 
+# Runs on every push to any branch and on pull requests, so a branch is checked before it is
+# ever merged. It does not run on tags. The single job `ci-ok` at the bottom is the one to mark
+# as required in GitHub's branch protection: it is green only if everything above it is green.
 on:
+  push:
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
+# A new push to the same branch or pull request cancels the run still going for the old one.
+# Never cancels runs on main.
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
 jobs:
-  lint-and-build:
-    runs-on: ubuntu-latest
+  plan:
+    # Full OS and Python matrix for main and pull requests into main; a smaller one for
+    # feature branches so day-to-day pushes stay quick.
+    name: Plan the test matrix
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    outputs:
+      os: ${{ steps.matrix.outputs.os }}
+      python: ${{ steps.matrix.outputs.python }}
+    steps:
+      - id: matrix
+        env:
+          REF: ${{ github.ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          if [ "$REF" = "refs/heads/main" ] || [ "$BASE_REF" = "main" ]; then
+            echo "Full matrix (main or pull request into main)"
+            echo 'os=["ubuntu-latest","macos-latest","windows-latest"]' >> "$GITHUB_OUTPUT"
+            echo 'python=["3.10","3.11","3.12","3.13","3.14"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "Reduced matrix (feature branch)"
+            echo 'os=["ubuntu-latest","windows-latest"]' >> "$GITHUB_OUTPUT"
+            echo 'python=["3.10","3.14"]' >> "$GITHUB_OUTPUT"
+          fi
+
+  quality:
+    name: Lint, format, types
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: ruff check .
+
+      - name: Format (ruff)
+        run: ruff format --check .
+
+      - name: Types (pyright, strict on src)
+        run: pyright
+
+  test:
+    name: Test (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    needs: plan
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
+        os: ${{ fromJSON(needs.plan.outputs.os) }}
+        python-version: ${{ fromJSON(needs.plan.outputs.python) }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
 
-      - name: Install package + dev tools
-        run: pip install -e ".[dev]"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
 
-      - name: Lint
-        run: ruff check .
+      - name: The command starts
+        run: |
+          tsuzuki --version
+          tsuzuki --help
+          python -m tsuzuki --version
 
-      - name: Build sdist + wheel (fails if packaging metadata is broken)
-        run: python -m build
+      - name: Tests
+        # Skipped until the first test file exists; from then on it runs automatically.
+        if: ${{ hashFiles('tests/**/test_*.py') != '' }}
+        run: pytest --cov=tsuzuki --cov-report=term-missing
+
+  build:
+    name: Build and smoke-test the wheel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build sdist and wheel, then validate the package metadata
+        run: |
+          pip install build twine
+          python -m build
+          twine check --strict dist/*
+
+      - name: Install the built wheel outside the repo and run it
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install dist/*.whl
+          cd /tmp
+          /tmp/smoke/bin/tsuzuki --version
+          /tmp/smoke/bin/tsuzuki --help > /dev/null
+          /tmp/smoke/bin/python - <<'PY'
+          import importlib.metadata as md
+          import importlib.resources as res
+
+          import tsuzuki
+
+          assert tsuzuki.__version__ == md.version("tsuzuki"), "version mismatch"
+          assert res.files("tsuzuki").joinpath("py.typed").is_file(), "py.typed missing"
+          scripts = {e.name for e in md.distribution("tsuzuki").entry_points
+                     if e.group == "console_scripts"}
+          assert scripts == {"tsuzuki"}, f"unexpected console scripts: {scripts}"
+          print("ok", tsuzuki.__version__)
+          PY
+
+  commit-style:
+    # Advisory only: it warns, it never fails. The changelog is written from commit messages,
+    # and a message that is not in the usual `type: summary` form is silently left out of it.
+    name: Commit messages (advisory)
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: python3 .github/scripts/check_commit_messages.py origin/main
+
+  ci-ok:
+    # The one check to require on `main`. The test matrix changes between the full and the
+    # reduced version, so its individual jobs can't be required by name.
+    name: ci-ok
+    needs: [quality, test, build]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Everything required passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Results: $RESULTS"
+          case "$RESULTS" in
+            *failure*|*cancelled*|*skipped*) exit 1 ;;
+          esac

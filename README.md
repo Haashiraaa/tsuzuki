@@ -73,5 +73,9 @@ scripts/
 
 ```bash
 pip install -e ".[dev]"
-ruff check . && pyright
+ruff check . && ruff format --check . && pyright
 ```
+
+Commit messages use [Conventional Commits](https://www.conventionalcommits.org/)
+(`feat: ...`, `fix: ...`): the changelog, version bumps and releases are generated from them.
+See [docs/releasing.md](docs/releasing.md).
