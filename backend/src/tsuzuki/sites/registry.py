@@ -31,3 +31,8 @@ def host_matches(host: str, hosts: tuple[str, ...]) -> bool:
 
 def supported_hosts() -> list[str]:
     return [host for entry in _ENTRIES for host in entry.hosts]
+
+
+def known_sites() -> list[SiteEntry]:
+    """Every registered site, for screens that list them."""
+    return list(_ENTRIES)

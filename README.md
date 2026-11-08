@@ -58,12 +58,33 @@ backend/src/tsuzuki/
     download/    aria2c, built-in streaming (resumable), skip-if-complete, and the chooser
     net/         HTTP helpers (timeouts, default headers, error translation), URL helpers
     storage/     SQLite: series, episodes and what became of each download (see below)
+    api/         the web API the frontend talks to (see below)
 tests/           mirrors backend/src/tsuzuki: tests/storage tests tsuzuki.storage, and so on
 scripts/
     probe_ytdlp.py   check whether yt-dlp can handle a site (run locally)
 ```
 
 `core/` never prints, parses arguments or exits, so a web front-end can drive the same runner.
+
+## Web server
+
+```bash
+pip install -e ".[server]"
+python -m tsuzuki.api              # http://127.0.0.1:8000, interactive docs at /api/docs
+python -m tsuzuki.api --help       # port, folder, slots, how long finished files wait
+```
+
+The routes are the ones listed in `frontend/README.md`. Saving an episode to a device
+(`GET /api/episodes/<id>/file`) deletes the server's copy once the last byte has been sent;
+an episode nobody collects is removed after 24 hours (`--keep-hours`). Its row stays, so the
+library still shows it as downloaded, and asking for it again fetches it from the site.
+
+**There is no login yet.** By default the server only listens on this computer. Before putting
+it on a public server, put it behind a reverse proxy that asks for a password (or a private
+network such as Tailscale).
+
+Not built yet: the background worker that actually runs queued downloads, pausing, and saving
+site profiles (those routes answer "not supported yet").
 
 ## Storage
 
