@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.7.0...v0.8.0) (2026-11-08)
+
+
+### Features
+
+* **worker:** run queued downloads in the background ([#12](https://github.com/Haashiraaa/tsuzuki/issues/12)) ([5686cf9](https://github.com/Haashiraaa/tsuzuki/commit/5686cf9133c39280ea7c81260260cd137dbd42c9))
+
 ## [0.7.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.6.0...v0.7.0) (2026-11-08)
 
 
