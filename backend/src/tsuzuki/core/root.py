@@ -36,6 +36,10 @@ class Root:
     def logs(self) -> Path:
         return self.path / "logs"
 
+    @property
+    def database(self) -> Path:
+        return self.path / "tsuzuki.db"
+
 
 def resolve_root(
     explicit: Path | None = None,
@@ -79,7 +83,7 @@ def from_home(home: Path) -> Root:
 def find_project_root(handler: FileHandler, start: Path, name: str = APP_NAME) -> Path | None:
     """Nearest ancestor called ``name`` that also holds ``pyproject.toml``.
 
-    The package folder ``src/tsuzuki`` has the same name as the repo, so the plain
+    The package folder ``backend/src/tsuzuki`` has the same name as the repo, so the plain
     name match would stop there. The marker file skips it and keeps climbing.
     """
     current = start

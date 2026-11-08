@@ -68,7 +68,7 @@ jobs:
       - name: Format (ruff)
         run: ruff format --check .
 
-      - name: Types (pyright, strict on src)
+      - name: Types (pyright, strict on backend/src)
         run: pyright
 
   test:
@@ -138,6 +138,12 @@ jobs:
 
           assert tsuzuki.__version__ == md.version("tsuzuki"), "version mismatch"
           assert res.files("tsuzuki").joinpath("py.typed").is_file(), "py.typed missing"
+
+          from tsuzuki.storage import open_database
+
+          assert open_database(":memory:").execute("PRAGMA user_version").fetchone()[0] >= 1, (
+              "bundled SQL migrations missing from the wheel"
+          )
           scripts = {e.name for e in md.distribution("tsuzuki").entry_points
                      if e.group == "console_scripts"}
           assert scripts == {"tsuzuki"}, f"unexpected console scripts: {scripts}"

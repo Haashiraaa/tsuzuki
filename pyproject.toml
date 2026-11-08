@@ -48,26 +48,31 @@ Repository = "https://github.com/Haashiraaa/tsuzuki"
 tsuzuki = "tsuzuki.cli:main"
 
 [tool.setuptools]
-package-dir = { "" = "src" }
+package-dir = { "" = "backend/src" }
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["backend/src"]
 
 [tool.setuptools.package-data]
-tsuzuki = ["py.typed"]
+tsuzuki = ["py.typed", "storage/migrations/*.sql"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["backend/src"]
 addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+src = ["backend/src", "."]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
+[tool.ruff.lint.isort]
+known-first-party = ["tsuzuki", "tests"]
+
 [tool.pyright]
-include = ["src", "scripts"]
-strict = ["src"]
+include = ["backend/src", "scripts", "tests"]
+strict = ["backend/src"]
 pythonVersion = "3.10"
