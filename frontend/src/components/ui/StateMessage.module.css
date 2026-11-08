@@ -1,0 +1,8 @@
+.message {
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.error {
+  color: var(--warn);
+}

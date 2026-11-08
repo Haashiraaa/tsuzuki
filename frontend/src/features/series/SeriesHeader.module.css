@@ -1,0 +1,35 @@
+.back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+.text {
+  flex: 1 1 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.facts {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.url {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--faint);
+  overflow-wrap: anywhere;
+}

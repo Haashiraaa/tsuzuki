@@ -1,0 +1,26 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: var(--radius-card);
+  background: var(--panel-soft);
+  border: 1px solid var(--border);
+}
+
+.summary {
+  flex: 1 1 200px;
+  font-size: 15px;
+  color: var(--text-soft);
+}
+
+.queue {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bar .go {
+  padding: 0 24px;
+  font-size: 16px;
+}

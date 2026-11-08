@@ -1,0 +1,39 @@
+.rail {
+  flex: 1 1 280px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.name {
+  font-weight: 500;
+}
+
+.percent {
+  color: var(--muted);
+}
+
+.detail {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.empty {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.link {
+  font-size: 14px;
+  font-weight: 500;
+}

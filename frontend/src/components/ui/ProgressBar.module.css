@@ -1,0 +1,31 @@
+.track {
+  background: var(--track);
+  overflow: hidden;
+}
+
+.s {
+  height: 6px;
+  border-radius: 3px;
+}
+
+.m {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.accent {
+  background: var(--accent);
+}
+
+.ok {
+  background: var(--ok);
+}
+
+.warn {
+  background: var(--warn);
+}

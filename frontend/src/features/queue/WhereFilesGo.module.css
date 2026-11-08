@@ -1,0 +1,25 @@
+.aside {
+  flex: 1 1 280px;
+  gap: 14px;
+}
+
+.text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #c9c2b8;
+}
+
+.text strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.path {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}

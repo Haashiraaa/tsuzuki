@@ -1,0 +1,28 @@
+.field {
+  flex: 1 1 240px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-input);
+  color: var(--text);
+  font-family: inherit;
+}
+
+.l {
+  flex-basis: 320px;
+  height: 52px;
+  padding: 0 18px;
+  font-size: 16px;
+}
+
+.m {
+  height: 48px;
+  padding: 0 16px;
+  font-size: 15px;
+}
+
+.panel {
+  background: var(--panel);
+}
+
+.page {
+  background: var(--bg);
+}

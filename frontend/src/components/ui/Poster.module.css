@@ -1,0 +1,22 @@
+.poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.banner {
+  height: 112px;
+  border-radius: var(--radius-small);
+  font-size: 48px;
+}
+
+.square {
+  flex: 0 0 auto;
+  width: 96px;
+  height: 96px;
+  border-radius: 14px;
+  font-size: 44px;
+}
