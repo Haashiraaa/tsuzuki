@@ -83,8 +83,12 @@ library still shows it as downloaded, and asking for it again fetches it from th
 it on a public server, put it behind a reverse proxy that asks for a password (or a private
 network such as Tailscale).
 
-Not built yet: the background worker that actually runs queued downloads, pausing, and saving
-site profiles (those routes answer "not supported yet").
+Downloads run in the background while the server is up: `--slots` of them at once (default 3),
+oldest request first, using aria2c when it is installed and the built-in downloader otherwise.
+If the server stops, running downloads go back in the queue and carry on from where they stopped.
+`--max-waiting-gb` pauses the queue while finished-but-uncollected files fill that much disk.
+
+Not built yet: pausing, and saving site profiles (those routes answer "not supported yet").
 
 ## Storage
 

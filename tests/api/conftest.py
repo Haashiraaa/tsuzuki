@@ -41,7 +41,7 @@ def state(tmp_path: Path, now: datetime) -> ApiState:
 
 @pytest.fixture
 def client(state: ApiState) -> Iterator[TestClient]:
-    with TestClient(create_app(state, sweep=False)) as test_client:
+    with TestClient(create_app(state, sweep=False, work=False)) as test_client:
         yield test_client
 
 

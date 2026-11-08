@@ -4,7 +4,6 @@ except where a view has to look up a name, so most of it is easy to test."""
 import sqlite3
 from pathlib import Path
 
-from tsuzuki.api.progress import ProgressBoard
 from tsuzuki.api.schemas import (
     ActiveOut,
     EpisodeOut,
@@ -14,6 +13,7 @@ from tsuzuki.api.schemas import (
     WaitingOut,
 )
 from tsuzuki.core.errors import StorageError
+from tsuzuki.core.progress import ProgressBoard
 from tsuzuki.storage import (
     EpisodeRecord,
     EpisodeStatus,
