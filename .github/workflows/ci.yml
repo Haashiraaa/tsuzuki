@@ -8,6 +8,9 @@ on:
     branches: ["**"]
   pull_request:
   workflow_dispatch:
+  schedule:
+    # The full OS and Python matrix, once a week (Mondays 03:00 UTC).
+    - cron: "0 3 * * 1"
 
 # A new push to the same branch or pull request cancels the run still going for the old one.
 # Never cancels runs on main.
@@ -20,8 +23,9 @@ permissions:
 
 jobs:
   plan:
-    # Full OS and Python matrix for main and pull requests into main; a smaller one for
-    # feature branches so day-to-day pushes stay quick.
+    # A small matrix on every push and pull request (the release PR too), so checks finish
+    # quickly. The full matrix, macOS included, runs weekly and when started by hand
+    # (Actions tab > CI > Run workflow).
     name: Plan the test matrix
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -31,15 +35,14 @@ jobs:
     steps:
       - id: matrix
         env:
-          REF: ${{ github.ref }}
-          BASE_REF: ${{ github.base_ref }}
+          EVENT: ${{ github.event_name }}
         run: |
-          if [ "$REF" = "refs/heads/main" ] || [ "$BASE_REF" = "main" ]; then
-            echo "Full matrix (main or pull request into main)"
+          if [ "$EVENT" = "schedule" ] || [ "$EVENT" = "workflow_dispatch" ]; then
+            echo "Full matrix ($EVENT)"
             echo 'os=["ubuntu-latest","macos-latest","windows-latest"]' >> "$GITHUB_OUTPUT"
             echo 'python=["3.10","3.11","3.12","3.13","3.14"]' >> "$GITHUB_OUTPUT"
           else
-            echo "Reduced matrix (feature branch)"
+            echo "Small matrix"
             echo 'os=["ubuntu-latest","windows-latest"]' >> "$GITHUB_OUTPUT"
             echo 'python=["3.10","3.14"]' >> "$GITHUB_OUTPUT"
           fi
