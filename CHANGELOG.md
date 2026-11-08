@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.6.0...v0.7.0) (2026-11-08)
+
+
+### Features
+
+* **storage:** manage the SQLite schema with Alembic ([#11](https://github.com/Haashiraaa/tsuzuki/issues/11)) ([8e5727b](https://github.com/Haashiraaa/tsuzuki/commit/8e5727b9bf687c3edec367d80e5176c7a9c88249))
+
 ## [0.6.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.5.0...v0.6.0) (2026-11-08)
 
 
