@@ -52,6 +52,13 @@ def list_summaries(conn: sqlite3.Connection) -> list[SeriesSummary]:
     return [summarize(series, counts.get(series.id, {})) for series in list_series(conn)]
 
 
+def get_summary(conn: sqlite3.Connection, series_id: int) -> SeriesSummary | None:
+    series = get_series(conn, series_id)
+    if series is None:
+        return None
+    return summarize(series, status_counts_by_series(conn).get(series_id, {}))
+
+
 def status_counts_by_series(conn: sqlite3.Connection) -> dict[int, dict[EpisodeStatus, int]]:
     rows = conn.execute(
         "SELECT series_id, status, COUNT(*) AS n FROM episodes GROUP BY series_id, status"
