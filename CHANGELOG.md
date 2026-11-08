@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.4.0...v0.5.0) (2026-11-08)
+
+
+### Features
+
+* **frontend:** add the web app from the mockup, running on sample data ([#5](https://github.com/Haashiraaa/tsuzuki/issues/5)) ([bba9c60](https://github.com/Haashiraaa/tsuzuki/commit/bba9c602512da4d69f265d8f58b80103a831a22f))
+
 ## [0.4.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.3.0...v0.4.0) (2026-11-08)
 
 
