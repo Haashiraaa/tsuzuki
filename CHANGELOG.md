@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/Haashiraaa/tsuzuki/compare/v0.8.0...v0.8.1) (2026-11-08)
+
+
+### Documentation
+
+* add deployment guide (Caddy with a password, Tailscale as the alternative) ([#16](https://github.com/Haashiraaa/tsuzuki/issues/16)) ([2f43c3e](https://github.com/Haashiraaa/tsuzuki/commit/2f43c3edef9afb7c266c236c10b4f068762f3fdc))
+
 ## [0.8.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.7.0...v0.8.0) (2026-11-08)
 
 
