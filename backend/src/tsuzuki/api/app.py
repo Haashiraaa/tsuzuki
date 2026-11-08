@@ -63,6 +63,8 @@ async def sweep_forever(state: ApiState) -> None:
 
 
 def create_app(state: ApiState, *, sweep: bool = True) -> FastAPI:
+    state.prepare()
+
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         task = asyncio.create_task(sweep_forever(state)) if sweep else None

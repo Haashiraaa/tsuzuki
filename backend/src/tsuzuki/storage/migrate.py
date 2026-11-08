@@ -1,73 +1,71 @@
-"""Schema versions. The version lives in SQLite's own ``user_version``; no extra table.
+"""Schema versions, handled by Alembic.
 
-Migrations are the ``NNNN_name.sql`` files in ``migrations/``. They are applied in order, each in
-its own transaction together with the version bump, so a failure leaves the database at the last
-good version. Never edit a migration that has been released: add a new one.
+The migrations are the files in ``migrations/versions/``. They are plain Python that run SQL,
+written by hand (there are no ORM models to generate them from). Each runs in its own
+transaction, so a failure leaves the database at the last good version. Never edit a migration
+that has been released: add a new one.
+
+To add one while developing, from the repository root::
+
+    alembic revision --rev-id 0002 -m "add notes to episodes"
+
+then fill in ``upgrade()`` in the new file. Alembic keeps the current version in a table named
+``alembic_version``.
 """
 
-import re
-import sqlite3
-from dataclasses import dataclass
-from importlib import resources
+from pathlib import Path
+
+from alembic import command
+from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
+from alembic.util.exc import CommandError
+from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.pool import NullPool
 
 from tsuzuki.core.errors import StorageError
 
-FILE_PATTERN = re.compile(r"^(\d{4})_([a-z0-9_]+)\.sql$")
-PACKAGE = "tsuzuki.storage.migrations"
+SCRIPTS = Path(__file__).resolve().parent / "migrations"
 
 
-@dataclass(frozen=True)
-class Migration:
-    version: int
-    name: str
-    sql: str
+def make_config(database: Path, scripts: Path = SCRIPTS) -> Config:
+    config = Config()
+    config.set_main_option("script_location", str(scripts))
+    # The ini format treats % as special, so a path containing one has to be escaped.
+    url = f"sqlite:///{database}".replace("%", "%%")
+    config.set_main_option("sqlalchemy.url", url)
+    return config
 
 
-def discover() -> list[Migration]:
-    """The bundled migrations, in order. Versions must run 1, 2, 3, ... with no gaps."""
-    found: list[Migration] = []
-    for entry in resources.files(PACKAGE).iterdir():
-        match = FILE_PATTERN.match(entry.name)
-        if match:
-            text = entry.read_text(encoding="utf-8")
-            found.append(Migration(int(match.group(1)), match.group(2), text))
-    found.sort(key=lambda m: m.version)
-    check_sequence(found)
-    return found
+def head_revision(scripts: Path = SCRIPTS) -> str | None:
+    """The newest version this copy of Tsuzuki knows."""
+    return ScriptDirectory(str(scripts)).get_current_head()
 
 
-def check_sequence(migrations: list[Migration]) -> None:
-    for expected, migration in enumerate(migrations, start=1):
-        if migration.version != expected:
-            raise StorageError(
-                f"Migration {migration.version:04d} found where {expected:04d} was expected"
-            )
-
-
-def current_version(conn: sqlite3.Connection) -> int:
-    return int(conn.execute("PRAGMA user_version").fetchone()[0])
-
-
-def migrate(conn: sqlite3.Connection, migrations: list[Migration] | None = None) -> int:
-    """Apply what is missing and return the resulting version."""
-    available = discover() if migrations is None else migrations
-    version = current_version(conn)
-    if version > len(available):
-        raise StorageError(
-            f"Database is at version {version} but this Tsuzuki only knows {len(available)}. "
-            "It was written by a newer version."
-        )
-    for migration in available[version:]:
-        apply(conn, migration)
-    return current_version(conn)
-
-
-def apply(conn: sqlite3.Connection, migration: Migration) -> None:
-    script = f"BEGIN;\n{migration.sql}\nPRAGMA user_version = {migration.version};\nCOMMIT;"
+def current_revision(database: Path) -> str | None:
+    """The version the database file is at (None for a new, empty one)."""
+    engine = create_engine(f"sqlite:///{database}", poolclass=NullPool)
     try:
-        conn.executescript(script)
-    except sqlite3.Error as exc:
-        if conn.in_transaction:
-            conn.execute("ROLLBACK")
-        label = f"{migration.version:04d}_{migration.name}"
-        raise StorageError(f"Migration {label} failed: {exc}") from exc
+        with engine.connect() as connection:
+            return MigrationContext.configure(connection).get_current_revision()
+    except SQLAlchemyError as exc:
+        raise StorageError(f"Cannot read the database version of {database}: {exc}") from exc
+    finally:
+        engine.dispose()
+
+
+def migrate(database: Path, scripts: Path = SCRIPTS) -> str | None:
+    """Bring the database file up to the newest version. Returns the version it ends at."""
+    try:
+        command.upgrade(make_config(database, scripts), "head")
+    except CommandError as exc:
+        if "Can't locate revision" in str(exc):
+            raise StorageError(
+                f"{database} was made by a newer version of Tsuzuki. Update Tsuzuki, or use "
+                "a different folder."
+            ) from exc
+        raise StorageError(f"Cannot upgrade the database {database}: {exc}") from exc
+    except SQLAlchemyError as exc:
+        raise StorageError(f"Cannot upgrade the database {database}: {exc}") from exc
+    return current_revision(database)
