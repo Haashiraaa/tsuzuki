@@ -30,6 +30,7 @@ dependencies = [
     "lxml>=5.0",
     "tqdm>=4.66",
     "haashi>=1.3,<2",
+    "alembic>=1.13",
 ]
 
 [project.optional-dependencies]
@@ -62,7 +63,12 @@ package-dir = { "" = "backend/src" }
 where = ["backend/src"]
 
 [tool.setuptools.package-data]
-tsuzuki = ["py.typed", "storage/migrations/*.sql"]
+tsuzuki = [
+    "py.typed",
+    "storage/migrations/env.py",
+    "storage/migrations/script.py.mako",
+    "storage/migrations/versions/*.py",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

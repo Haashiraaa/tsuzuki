@@ -1,6 +1,7 @@
 """Opening the SQLite file and running work inside a transaction.
 
-A connection belongs to one thread. Give each worker thread its own (``open_database`` is cheap).
+``open_database`` upgrades the schema first, so call it once when the program starts. After
+that ``connect`` is all a thread needs: a connection belongs to one thread, so give each its own.
 WAL mode lets readers and one writer work at the same time; ``busy_timeout`` makes a second
 writer wait instead of failing at once.
 """
@@ -34,13 +35,19 @@ def configure(conn: sqlite3.Connection) -> None:
     conn.execute("PRAGMA synchronous = NORMAL")
 
 
+def prepare_database(path: Path | str) -> None:
+    """Create the folder if needed and bring the schema up to date. Safe to repeat."""
+    if str(path) == ":memory:":
+        raise StorageError("An in-memory database cannot be migrated; use a file.")
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    migrate(target)
+
+
 def open_database(path: Path | str) -> sqlite3.Connection:
-    """Create the folder if needed, connect, and bring the schema up to date."""
-    if str(path) != ":memory:":
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
-    conn = connect(path)
-    migrate(conn)
-    return conn
+    """Prepare the file (see ``prepare_database``) and open a connection to it."""
+    prepare_database(path)
+    return connect(path)
 
 
 @contextmanager

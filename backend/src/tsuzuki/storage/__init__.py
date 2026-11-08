@@ -8,7 +8,7 @@ Typical use::
         sync_episodes(conn, series.id, [(e.number, e.ref) for e in listed], utc_now())
 """
 
-from tsuzuki.storage.database import connect, open_database, transaction
+from tsuzuki.storage.database import connect, open_database, prepare_database, transaction
 from tsuzuki.storage.episodes import (
     count_by_status,
     due_for_expiry,
@@ -61,6 +61,7 @@ __all__ = [
     "list_series",
     "list_summaries",
     "open_database",
+    "prepare_database",
     "ready_bytes",
     "remove_file",
     "sweep_expired",

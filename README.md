@@ -88,10 +88,17 @@ site profiles (those routes answer "not supported yet").
 
 ## Storage
 
-One SQLite file, `<root>/tsuzuki.db`, using only Python's built-in `sqlite3` (no ORM, no Alembic).
-The schema is versioned with SQLite's own `user_version` and numbered files in
-`backend/src/tsuzuki/storage/migrations/`; add a new `NNNN_name.sql` to change it and never edit
-one that has been released.
+One SQLite file, `<root>/tsuzuki.db`, read and written with Python's built-in `sqlite3` (no ORM).
+Its schema is managed by **Alembic**: migrations are hand-written files in
+`backend/src/tsuzuki/storage/migrations/versions/`, and the database upgrades itself when the
+server starts. To change the schema, from the repository root:
+
+```bash
+alembic revision --rev-id 0002 -m "what changes"    # then fill in upgrade() in the new file
+```
+
+Never edit a migration that has been released; add a new one. Each migration runs in its own
+transaction, so a failure leaves the database at the last good version.
 
 An episode moves through `available -> queued -> downloading -> ready -> delivered`
 (or `expired`, or `failed`; the last three can be queued again). The server keeps a finished file

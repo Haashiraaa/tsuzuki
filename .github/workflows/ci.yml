@@ -142,10 +142,17 @@ jobs:
           assert tsuzuki.__version__ == md.version("tsuzuki"), "version mismatch"
           assert res.files("tsuzuki").joinpath("py.typed").is_file(), "py.typed missing"
 
+          import pathlib
+          import tempfile
+
           from tsuzuki.storage import open_database
 
-          assert open_database(":memory:").execute("PRAGMA user_version").fetchone()[0] >= 1, (
-              "bundled SQL migrations missing from the wheel"
+          with tempfile.TemporaryDirectory() as folder:
+              conn = open_database(pathlib.Path(folder) / "smoke.db")
+              tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master")}
+              conn.close()
+          assert {"series", "episodes", "alembic_version"} <= tables, (
+              f"bundled migrations missing from the wheel: {tables}"
           )
           scripts = {e.name for e in md.distribution("tsuzuki").entry_points
                      if e.group == "console_scripts"}

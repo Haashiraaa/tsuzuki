@@ -1,74 +1,121 @@
+import shutil
 import sqlite3
+from pathlib import Path
 
 import pytest
 
 from tsuzuki.core.errors import StorageError
-from tsuzuki.storage.database import connect
-from tsuzuki.storage.migrate import (
-    FILE_PATTERN,
-    Migration,
-    check_sequence,
-    current_version,
-    discover,
-    migrate,
-)
+from tsuzuki.storage.database import open_database, prepare_database
+from tsuzuki.storage.migrate import SCRIPTS, current_revision, head_revision, migrate
 
 
-def tables(conn: sqlite3.Connection) -> set[str]:
-    rows = conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall()
-    return {row["name"] for row in rows}
+def tables(path: Path) -> set[str]:
+    conn = sqlite3.connect(path)
+    try:
+        rows = conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall()
+    finally:
+        conn.close()
+    return {row[0] for row in rows}
 
 
-class TestDiscover:
-    def test_finds_the_bundled_migrations_in_order(self) -> None:
-        found = discover()
-        assert [m.version for m in found] == list(range(1, len(found) + 1))
-        assert found[0].name == "initial"
-        assert "CREATE TABLE series" in found[0].sql
-
-    def test_file_names_must_be_numbered(self) -> None:
-        assert FILE_PATTERN.match("0002_add_notes.sql")
-        assert FILE_PATTERN.match("2_add_notes.sql") is None
-        assert FILE_PATTERN.match("0002_Add-Notes.sql") is None
-        assert FILE_PATTERN.match("__init__.py") is None
-
-    def test_a_gap_in_the_numbers_is_refused(self) -> None:
-        with pytest.raises(StorageError, match="0003"):
-            check_sequence([Migration(1, "a", ""), Migration(3, "c", "")])
+def scripts_with(tmp_path: Path, *revisions: tuple[str, str | None, list[str]]) -> Path:
+    """A throwaway migrations folder: Tsuzuki's own env.py plus the given revisions, each as
+    ``(id, previous id, SQL statements)``."""
+    folder = tmp_path / "scripts"
+    (folder / "versions").mkdir(parents=True)
+    shutil.copy(SCRIPTS / "env.py", folder / "env.py")
+    for rev, previous, statements in revisions:
+        body = "\n".join(f"    op.execute({sql!r})" for sql in statements)
+        (folder / "versions" / f"{rev}_step.py").write_text(
+            f"from alembic import op\nrevision = {rev!r}\ndown_revision = {previous!r}\n"
+            f"branch_labels = None\ndepends_on = None\n\n"
+            f"def upgrade() -> None:\n{body}\n\ndef downgrade() -> None:\n    pass\n"
+        )
+    return folder
 
 
-class TestMigrate:
-    def test_fresh_database_reaches_the_latest_version(self) -> None:
-        conn = connect(":memory:")
-        version = migrate(conn)
-        assert version == len(discover())
-        assert {"series", "episodes"} <= tables(conn)
+def test_a_new_database_is_built_up_to_the_newest_version(tmp_path: Path) -> None:
+    path = tmp_path / "new.db"
+    assert migrate(path) == head_revision()
+    assert {"series", "episodes", "alembic_version"} <= tables(path)
 
-    def test_running_twice_changes_nothing(self) -> None:
-        conn = connect(":memory:")
-        first = migrate(conn)
-        assert migrate(conn) == first
 
-    def test_database_from_a_newer_version_is_refused(self) -> None:
-        conn = connect(":memory:")
-        conn.execute("PRAGMA user_version = 99")
-        with pytest.raises(StorageError, match="newer"):
-            migrate(conn)
+def test_migrating_twice_changes_nothing(tmp_path: Path) -> None:
+    path = tmp_path / "twice.db"
+    first = migrate(path)
+    assert migrate(path) == first
+    assert current_revision(path) == head_revision()
 
-    def test_only_missing_migrations_are_applied(self) -> None:
-        conn = connect(":memory:")
-        first = Migration(1, "first", "CREATE TABLE a (x INTEGER);")
-        migrate(conn, [first])
-        second = Migration(2, "second", "CREATE TABLE b (x INTEGER);")
-        assert migrate(conn, [first, second]) == 2
-        assert {"a", "b"} <= tables(conn)
 
-    def test_failed_migration_rolls_back_and_keeps_the_old_version(self) -> None:
-        conn = connect(":memory:")
-        good = Migration(1, "good", "CREATE TABLE a (x INTEGER);")
-        bad = Migration(2, "bad", "CREATE TABLE b (x INTEGER); THIS IS NOT SQL;")
-        with pytest.raises(StorageError, match="0002_bad"):
-            migrate(conn, [good, bad])
-        assert current_version(conn) == 1
-        assert "b" not in tables(conn)
-        assert not conn.in_transaction
+def test_a_database_from_a_newer_tsuzuki_is_refused(tmp_path: Path) -> None:
+    path = tmp_path / "future.db"
+    migrate(path)
+    conn = sqlite3.connect(path)
+    conn.execute("UPDATE alembic_version SET version_num = '9999'")
+    conn.commit()
+    conn.close()
+    with pytest.raises(StorageError, match="newer version"):
+        migrate(path)
+
+
+def test_each_step_is_applied_in_order(tmp_path: Path) -> None:
+    scripts = scripts_with(
+        tmp_path,
+        ("0001", None, ["CREATE TABLE a (id INTEGER)"]),
+        ("0002", "0001", ["CREATE TABLE b (id INTEGER)"]),
+    )
+    path = tmp_path / "steps.db"
+    assert migrate(path, scripts) == "0002"
+    assert {"a", "b"} <= tables(path)
+
+
+def test_a_failing_step_leaves_nothing_half_done(tmp_path: Path) -> None:
+    scripts = scripts_with(
+        tmp_path,
+        ("0001", None, ["CREATE TABLE a (id INTEGER)"]),
+        ("0002", "0001", ["CREATE TABLE b (id INTEGER)", "THIS IS NOT SQL"]),
+    )
+    path = tmp_path / "broken.db"
+    with pytest.raises(StorageError):
+        migrate(path, scripts)
+    assert current_revision(path) == "0001"
+    assert "a" in tables(path)
+    assert "b" not in tables(path)
+
+
+def test_a_fixed_step_is_applied_on_the_next_start(tmp_path: Path) -> None:
+    path = tmp_path / "retry.db"
+    broken = scripts_with(
+        tmp_path / "x",
+        ("0001", None, ["CREATE TABLE a (id INTEGER)"]),
+        ("0002", "0001", ["NOT SQL"]),
+    )
+    with pytest.raises(StorageError):
+        migrate(path, broken)
+    fixed = scripts_with(
+        tmp_path / "y",
+        ("0001", None, ["CREATE TABLE a (id INTEGER)"]),
+        ("0002", "0001", ["CREATE TABLE b (id INTEGER)"]),
+    )
+    assert migrate(path, fixed) == "0002"
+
+
+def test_paths_with_odd_characters_work(tmp_path: Path) -> None:
+    folder = tmp_path / "my 100% anime"
+    path = folder / "t.db"
+    prepare_database(path)
+    assert "series" in tables(path)
+
+
+def test_open_database_creates_the_folder_and_connects(tmp_path: Path) -> None:
+    path = tmp_path / "deep" / "er" / "t.db"
+    conn = open_database(path)
+    try:
+        assert conn.execute("SELECT COUNT(*) FROM series").fetchone()[0] == 0
+    finally:
+        conn.close()
+
+
+def test_an_in_memory_database_is_refused_with_a_clear_message() -> None:
+    with pytest.raises(StorageError, match="in-memory"):
+        prepare_database(":memory:")
