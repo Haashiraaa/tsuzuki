@@ -8,13 +8,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from tsuzuki.api.routes import downloads, files, series, sites
+from tsuzuki.api.routes import downloads, files, me, series, sites
 from tsuzuki.api.state import ApiState
+from tsuzuki.api.visitor import VisitorMiddleware
 from tsuzuki.core.errors import (
     ConfigError,
     DownloadError,
     FetchError,
     InvalidTransitionError,
+    LimitError,
     ParseError,
     SiteNotSupportedError,
     StorageError,
@@ -30,6 +32,7 @@ SWEEP_EVERY_SECONDS = 600
 # Which HTTP status each kind of Tsuzuki error becomes. More specific classes come first.
 STATUS_FOR: list[tuple[type[TsuzukiError], int]] = [
     (InvalidTransitionError, 409),
+    (LimitError, 429),
     (StorageError, 500),
     (ConfigError, 422),
     (SiteNotSupportedError, 422),
@@ -106,6 +109,8 @@ def create_app(state: ApiState, *, sweep: bool = True, work: bool = True) -> Fas
     def tsuzuki_error(_request: Request, error: TsuzukiError) -> JSONResponse:  # pyright: ignore[reportUnusedFunction]
         return JSONResponse({"detail": str(error)}, status_code=status_for(error))
 
-    for module in (series, downloads, files, sites):
+    app.add_middleware(VisitorMiddleware, state=state)
+
+    for module in (series, downloads, files, sites, me):
         app.include_router(module.router, prefix="/api")
     return app

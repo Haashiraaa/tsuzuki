@@ -14,7 +14,8 @@ from fastapi.responses import FileResponse, StreamingResponse
 
 from tsuzuki.api.deps import State, episode_or_404
 from tsuzuki.api.state import ApiState
-from tsuzuki.storage import EpisodeRecord, EpisodeStatus, confirm_delivery
+from tsuzuki.api.visitor import RequiredVisitor
+from tsuzuki.storage import EpisodeRecord, EpisodeStatus, confirm_visitor_delivery, get_request
 
 router = APIRouter()
 
@@ -23,10 +24,14 @@ MEDIA_TYPE = "video/mp4"
 GONE = 410
 
 
-def ready_file(state: ApiState, episode_id: int) -> tuple[EpisodeRecord, Path]:
-    """The episode and its file, if it is ready and the file is really there and inside the
-    downloads folder."""
+def ready_file(state: ApiState, visitor: int, episode_id: int) -> tuple[EpisodeRecord, Path]:
+    """The episode and its file, if this visitor asked for it, it is ready, and the file is
+    really there and inside the downloads folder."""
     record = episode_or_404(state, episode_id)
+    with state.database() as conn:
+        mine = get_request(conn, visitor, episode_id)
+    if mine is None or mine.delivered_at is not None:
+        raise HTTPException(404, f"Episode {episode_id} is not in your queue")
     if record.status is not EpisodeStatus.READY or not record.file_path:
         raise HTTPException(409, f"Episode {episode_id} is {record.status.value}, not ready")
     path = Path(record.file_path).resolve()
@@ -37,7 +42,9 @@ def ready_file(state: ApiState, episode_id: int) -> tuple[EpisodeRecord, Path]:
     return record, path
 
 
-def send_then_deliver(state: ApiState, episode_id: int, path: Path) -> Generator[bytes]:
+def send_then_deliver(
+    state: ApiState, visitor: int, episode_id: int, path: Path
+) -> Generator[bytes]:
     """Yield the file; after the last byte, record the delivery and remove the server's copy.
     If the browser gives up half way, the generator is closed before that line and the file
     stays for another try."""
@@ -45,15 +52,15 @@ def send_then_deliver(state: ApiState, episode_id: int, path: Path) -> Generator
         while chunk := handle.read(CHUNK_BYTES):
             yield chunk
     with state.database() as conn:
-        confirm_delivery(conn, state.root.downloads, episode_id, state.clock())
+        confirm_visitor_delivery(conn, state.root.downloads, visitor, episode_id, state.clock())
 
 
 @router.get("/episodes/{episode_id}/file")
-def save_to_device(episode_id: int, state: State) -> StreamingResponse:
-    _record, path = ready_file(state, episode_id)
+def save_to_device(episode_id: int, state: State, visitor: RequiredVisitor) -> StreamingResponse:
+    _record, path = ready_file(state, visitor, episode_id)
     name = quote(path.name)
     return StreamingResponse(
-        send_then_deliver(state, episode_id, path),
+        send_then_deliver(state, visitor, episode_id, path),
         media_type=MEDIA_TYPE,
         headers={
             "Content-Length": str(path.stat().st_size),
@@ -63,6 +70,6 @@ def save_to_device(episode_id: int, state: State) -> StreamingResponse:
 
 
 @router.get("/episodes/{episode_id}/stream")
-def play(episode_id: int, state: State) -> FileResponse:
-    _record, path = ready_file(state, episode_id)
+def play(episode_id: int, state: State, visitor: RequiredVisitor) -> FileResponse:
+    _record, path = ready_file(state, visitor, episode_id)
     return FileResponse(path, media_type=MEDIA_TYPE)

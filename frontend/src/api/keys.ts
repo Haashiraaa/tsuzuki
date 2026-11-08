@@ -4,4 +4,5 @@ export const keys = {
   seriesDetail: (id: number, order: string, all: boolean) => ["series", id, order, all] as const,
   queue: ["queue"] as const,
   sites: ["sites"] as const,
+  restoreLink: ["restore-link"] as const,
 };

@@ -1,5 +1,4 @@
-"""Turn storage records into the shapes the frontend shows. No database or web code here
-except where a view has to look up a name, so most of it is easy to test."""
+"""Turn storage records into the shapes the frontend shows."""
 
 import sqlite3
 from pathlib import Path
@@ -12,19 +11,21 @@ from tsuzuki.api.schemas import (
     SeriesOut,
     WaitingOut,
 )
-from tsuzuki.core.errors import StorageError
 from tsuzuki.core.progress import ProgressBoard
 from tsuzuki.storage import (
     EpisodeRecord,
     EpisodeStatus,
+    RequestRecord,
     SeriesSummary,
-    get_series,
-    list_by_status,
+    open_rows,
+    view_status,
 )
 
 S = EpisodeStatus
 STARTING = "Starting"
 EXAMPLE_FILE = "Downloads/Series-name/episode_1.mp4"
+WAITING_NOTE = "Waiting for a free slot"
+EXPIRED_NOTE = "Expired: it was not saved in time. Queue it again."
 
 
 def series_view(summary: SeriesSummary) -> SeriesOut:
@@ -40,8 +41,11 @@ def series_view(summary: SeriesSummary) -> SeriesOut:
     )
 
 
-def episode_view(record: EpisodeRecord) -> EpisodeOut:
-    return EpisodeOut(id=record.id, number=record.number, status=record.status.value)
+def episode_view(record: EpisodeRecord, request: RequestRecord | None) -> EpisodeOut:
+    """One episode as this visitor sees it: the file is shared, "delivered" is personal."""
+    return EpisodeOut(
+        id=record.id, number=record.number, status=view_status(record.status, request).value
+    )
 
 
 def display_name(title: str, number: str) -> str:
@@ -56,49 +60,45 @@ def failure_note(record: EpisodeRecord) -> str:
 def queue_view(
     conn: sqlite3.Connection,
     board: ProgressBoard,
+    visitor_id: int | None,
     *,
     downloads: Path,
     slots: int,
 ) -> QueueOut:
-    titles = TitleCache(conn)
-    downloading = list_by_status(conn, [S.DOWNLOADING])
-    queued = list_by_status(conn, [S.QUEUED])
-    failed = list_by_status(conn, [S.FAILED])
-    ready = list_by_status(conn, [S.READY])
+    """The queue screen for one visitor: only the episodes they asked for."""
+    rows = [] if visitor_id is None else open_rows(conn, visitor_id)
+    active: list[ActiveOut] = []
+    waiting: list[WaitingOut] = []
+    finished: list[FinishedOut] = []
+    ready: list[EpisodeRecord] = []
+    for row in rows:
+        episode = row.episode
+        name = display_name(row.series_title, episode.number)
+        if episode.status is S.DOWNLOADING:
+            active.append(active_view(episode, name, board))
+        elif episode.status is S.QUEUED:
+            waiting.append(WaitingOut(id=episode.id, name=name, note=WAITING_NOTE, failed=False))
+        elif episode.status is S.FAILED:
+            waiting.append(
+                WaitingOut(id=episode.id, name=name, note=failure_note(episode), failed=True)
+            )
+        elif episode.status is S.EXPIRED:
+            waiting.append(WaitingOut(id=episode.id, name=name, note=EXPIRED_NOTE, failed=True))
+        elif episode.status is S.READY:
+            finished.append(FinishedOut(id=episode.id, name=name))
+            ready.append(episode)
     return QueueOut(
-        active=[active_view(record, titles, board) for record in downloading],
-        waiting=[
-            *(waiting_view(record, titles) for record in queued),
-            *(failed_view(record, titles) for record in failed),
-        ],
-        finished=[
-            FinishedOut(id=r.id, name=display_name(titles.of(r.series_id), r.number)) for r in ready
-        ],
+        active=active,
+        waiting=waiting,
+        finished=finished,
         slots=slots,
-        downloads_folder=str(downloads),
+        downloads_folder=downloads.name,
         example_file=example_file(ready, downloads),
     )
 
 
-class TitleCache:
-    """Series titles by id, each looked up once per view."""
-
-    def __init__(self, conn: sqlite3.Connection) -> None:
-        self._conn = conn
-        self._titles: dict[int, str] = {}
-
-    def of(self, series_id: int) -> str:
-        if series_id not in self._titles:
-            series = get_series(self._conn, series_id)
-            if series is None:
-                raise StorageError(f"Episode points at a missing series: {series_id}")
-            self._titles[series_id] = series.title
-        return self._titles[series_id]
-
-
-def active_view(record: EpisodeRecord, titles: TitleCache, board: ProgressBoard) -> ActiveOut:
+def active_view(record: EpisodeRecord, name: str, board: ProgressBoard) -> ActiveOut:
     progress = board.get(record.id)
-    name = display_name(titles.of(record.series_id), record.number)
     if progress is None:
         return ActiveOut(
             id=record.id,
@@ -120,16 +120,6 @@ def active_view(record: EpisodeRecord, titles: TitleCache, board: ProgressBoard)
         bytes_per_second=int(progress.bytes_per_second),
         eta_seconds=progress.eta_seconds,
     )
-
-
-def waiting_view(record: EpisodeRecord, titles: TitleCache) -> WaitingOut:
-    name = display_name(titles.of(record.series_id), record.number)
-    return WaitingOut(id=record.id, name=name, note="Waiting for a free slot", failed=False)
-
-
-def failed_view(record: EpisodeRecord, titles: TitleCache) -> WaitingOut:
-    name = display_name(titles.of(record.series_id), record.number)
-    return WaitingOut(id=record.id, name=name, note=failure_note(record), failed=True)
 
 
 def example_file(ready: list[EpisodeRecord], downloads: Path) -> str:

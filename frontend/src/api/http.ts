@@ -16,6 +16,8 @@ export const httpApi: Api = {
   cancelEpisode: (id) => request<void>(`/episodes/${id}/cancel`, { method: "POST" }),
   fileUrl: (id) => `/api/episodes/${id}/file`,
   streamUrl: (id) => `/api/episodes/${id}/stream`,
+  getRestoreLink: async () =>
+    (await request<{ restorePath: string | null }>("/me")).restorePath,
   listSites: () => request<SiteInfo[]>("/sites"),
   testSite: (url) => request<SiteTest>("/sites/test", { method: "POST", body: { url } }),
   saveSiteProfile: (url) => request<void>("/sites/profiles", { method: "POST", body: { url } }),

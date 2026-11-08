@@ -3,8 +3,8 @@ from sqlite3 import Connection
 
 from fastapi.testclient import TestClient
 
-from tests._helpers import make_episodes, make_series
-from tests.api.conftest import SERIES_URL
+from tests._helpers import make_library
+from tests.api.conftest import SERIES_URL, Me
 from tsuzuki.storage import EpisodeStatus, find_episode, lifecycle
 
 
@@ -75,7 +75,8 @@ def test_unknown_series_is_404(client: TestClient) -> None:
     assert client.get("/api/series/999").status_code == 404
 
 
-def test_bad_order_is_rejected(client: TestClient, api_conn: Connection, now: datetime) -> None:
-    series = make_series(api_conn, now)
-    make_episodes(api_conn, series.id, now)
+def test_bad_order_is_rejected(
+    client: TestClient, api_conn: Connection, me: Me, now: datetime
+) -> None:
+    series, _ = make_library(api_conn, me.id, now)
     assert client.get(f"/api/series/{series.id}", params={"order": "sideways"}).status_code == 422

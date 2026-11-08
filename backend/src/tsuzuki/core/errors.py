@@ -53,3 +53,7 @@ class DownloadCancelled(TsuzukiError):
 
 class DownloadInterrupted(TsuzukiError):
     """The server is shutting down. The download goes back in the queue and resumes later."""
+
+
+class LimitError(TsuzukiError):
+    """A visitor asked for more than the server allows at once. The message says what to do."""

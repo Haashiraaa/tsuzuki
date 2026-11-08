@@ -6,6 +6,6 @@ background worker that actually runs downloads is separate and reports progress 
 """
 
 from tsuzuki.api.app import create_app
-from tsuzuki.api.state import ApiState
+from tsuzuki.api.state import ApiState, Limits
 
-__all__ = ["ApiState", "create_app"]
+__all__ = ["ApiState", "Limits", "create_app"]

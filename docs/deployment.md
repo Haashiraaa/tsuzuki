@@ -116,6 +116,20 @@ Open `https://tsuzuki.example.com`, sign in, and you are in. Caddy gets and rene
 certificate by itself. "Save to this device" works through it, because the browser already holds
 the password for that address.
 
+### Visitors, cookies and a big disk
+
+Each browser is recognised by a cookie the server sets on first use. Caddy's `reverse_proxy`
+passes `X-Forwarded-Proto: https` to the server, which is how it knows to mark the cookie
+`Secure`; no setting is needed while Caddy runs on the same machine. If you later add a second
+proxy in front, make sure it passes that header too.
+
+Per-person limits are `--max-open` (default 12 episodes at once) and `--max-series` (default 60)
+and can be added to `ExecStart`. With a larger disk, also raise `--max-waiting-gb` (the point at
+which new downloads pause until people save what is waiting), for example
+`--max-waiting-gb 2000` on a 3 TB disk. Files are deleted once everyone who asked for them has
+saved them, or after `--keep-hours`, so disk use follows how much is waiting, not how many
+people there are.
+
 ## Updating
 
 ```bash

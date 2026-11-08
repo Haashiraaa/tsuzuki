@@ -12,8 +12,9 @@ from pathlib import Path
 from tsuzuki.core.errors import StorageError
 from tsuzuki.storage import lifecycle
 from tsuzuki.storage.database import transaction
-from tsuzuki.storage.episodes import due_for_expiry
-from tsuzuki.storage.records import EpisodeRecord
+from tsuzuki.storage.episodes import due_for_expiry, get_episode
+from tsuzuki.storage.records import EpisodeRecord, EpisodeStatus
+from tsuzuki.storage.wants import mark_delivered
 
 
 def remove_file(downloads_root: Path, file_path: str | None) -> bool:
@@ -40,6 +41,26 @@ def confirm_delivery(
         record = lifecycle.deliver(conn, episode_id, now)
     remove_file(downloads_root, path)
     return record
+
+
+def confirm_visitor_delivery(
+    conn: sqlite3.Connection,
+    downloads_root: Path,
+    visitor_id: int,
+    episode_id: int,
+    now: datetime,
+) -> bool:
+    """This visitor has the whole file. The server's copy goes only when the last visitor who
+    asked for the episode has it; until then it stays for the others. Returns True if the file
+    was removed."""
+    path: str | None = None
+    with transaction(conn):
+        remaining = mark_delivered(conn, visitor_id, episode_id, now)
+        episode = get_episode(conn, episode_id)
+        if remaining == 0 and episode is not None and episode.status is EpisodeStatus.READY:
+            path = episode.file_path
+            lifecycle.deliver(conn, episode_id, now)
+    return remove_file(downloads_root, path)
 
 
 def sweep_expired(

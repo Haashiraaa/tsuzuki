@@ -102,3 +102,7 @@ class QueueEpisodesIn(Wire):
 
 class SiteUrlIn(Wire):
     url: str
+
+
+class MeOut(Wire):
+    restore_path: str | None

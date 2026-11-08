@@ -56,3 +56,28 @@ def make_ready(
         conn, episode.id, now, file_path=str(path), size_bytes=len(content), expires_at=now + ttl
     )
     return record, path
+
+
+def make_visitor(conn: sqlite3.Connection, now: datetime) -> tuple[int, str]:
+    """A new visitor: their id and the secret token their browser would hold."""
+    from tsuzuki.storage import create_visitor
+
+    return create_visitor(conn, now)
+
+
+def make_library(
+    conn: sqlite3.Connection,
+    visitor_id: int,
+    now: datetime,
+    *,
+    url: str = URL,
+    title: str = "Sample Show",
+    numbers: tuple[str, ...] = ("1", "2", "3"),
+) -> tuple[SeriesRecord, list[EpisodeRecord]]:
+    """A series with episodes, added to one visitor's library."""
+    from tsuzuki.storage import add_to_library
+
+    series = make_series(conn, now, url=url, title=title)
+    episodes = make_episodes(conn, series.id, now, numbers)
+    add_to_library(conn, visitor_id, series.id, now)
+    return series, episodes
