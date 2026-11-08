@@ -21,6 +21,7 @@ from tsuzuki.core.errors import (
     TsuzukiError,
 )
 from tsuzuki.storage import sweep_expired
+from tsuzuki.worker import Services, WorkerPool, WorkerSettings
 
 log = logging.getLogger("tsuzuki.api")
 
@@ -62,17 +63,39 @@ async def sweep_forever(state: ApiState) -> None:
         await asyncio.sleep(SWEEP_EVERY_SECONDS)
 
 
-def create_app(state: ApiState, *, sweep: bool = True) -> FastAPI:
+def build_pool(state: ApiState) -> WorkerPool:
+    settings = WorkerSettings(
+        database=state.root.database,
+        downloads=state.root.downloads,
+        retention=state.retention,
+        slots=state.slots,
+        poll_seconds=state.poll_seconds,
+    )
+    services = Services(
+        resolve_site=state.resolve_site,
+        clock=state.clock,
+        board=state.progress,
+        make_plan=state.make_plan,
+    )
+    return WorkerPool(settings, services)
+
+
+def create_app(state: ApiState, *, sweep: bool = True, work: bool = True) -> FastAPI:
     state.prepare()
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         task = asyncio.create_task(sweep_forever(state)) if sweep else None
+        pool = build_pool(state) if work else None
+        if pool:
+            pool.start()
         try:
             yield
         finally:
             if task:
                 task.cancel()
+            if pool:
+                await asyncio.to_thread(pool.stop)
 
     app = FastAPI(
         title="Tsuzuki", lifespan=lifespan, docs_url="/api/docs", openapi_url="/api/openapi.json"

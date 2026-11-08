@@ -1,4 +1,4 @@
-from tsuzuki.api.progress import Progress, ProgressBoard
+from tsuzuki.core.progress import Progress, ProgressBoard
 
 
 class Clock:

@@ -45,3 +45,11 @@ class FetchError(TsuzukiError):
     def __init__(self, message: str, *, retryable: bool) -> None:
         super().__init__(message)
         self.retryable = retryable
+
+
+class DownloadCancelled(TsuzukiError):
+    """Someone cancelled this download while it was running."""
+
+
+class DownloadInterrupted(TsuzukiError):
+    """The server is shutting down. The download goes back in the queue and resumes later."""

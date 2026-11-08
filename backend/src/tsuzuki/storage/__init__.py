@@ -37,8 +37,12 @@ from tsuzuki.storage.series import (
     upsert_series,
 )
 from tsuzuki.storage.times import utc_now
+from tsuzuki.storage.work import abandon, claim_next, recover_interrupted
 
 __all__ = [
+    "abandon",
+    "claim_next",
+    "recover_interrupted",
     "EpisodeRecord",
     "EpisodeStatus",
     "RetentionPolicy",

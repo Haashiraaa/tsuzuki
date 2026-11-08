@@ -6,11 +6,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from tsuzuki.api.progress import ProgressBoard
+from tsuzuki.core.progress import ProgressBoard
 from tsuzuki.core.root import Root
 from tsuzuki.sites.base import Site
 from tsuzuki.sites.registry import site_for
 from tsuzuki.storage import RetentionPolicy, connect, prepare_database, utc_now
+from tsuzuki.worker.job import PlanFactory, default_plan
 
 DEFAULT_SLOTS = 3
 
@@ -24,6 +25,8 @@ class ApiState:
     # Both are replaceable so tests can run without the network or the real clock.
     resolve_site: Callable[[str], Site] = site_for
     clock: Callable[[], datetime] = utc_now
+    make_plan: PlanFactory = default_plan
+    poll_seconds: float = 2.0  # how often an idle download slot looks for new work
 
     def prepare(self) -> None:
         """Create the database or bring it up to date. Run once, before serving requests."""

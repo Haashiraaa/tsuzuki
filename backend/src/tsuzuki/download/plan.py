@@ -21,11 +21,14 @@ def plan_downloads(
     *,
     aria2_present: bool | None = None,
     notice: Notice = ignore_notice,
+    capture_progress: bool = False,
 ) -> DownloadPlan:
     """With aria2c: parallel workers. Without: sequential downloads plus an install hint."""
     present = is_available() if aria2_present is None else aria2_present
     if present:
-        downloader = FallbackDownloader(Aria2Downloader(), StreamDownloader(), notice)
+        downloader = FallbackDownloader(
+            Aria2Downloader(capture_progress=capture_progress), StreamDownloader(), notice
+        )
         return DownloadPlan(downloader, requested_workers)
     return DownloadPlan(
         FallbackDownloader(None, StreamDownloader(), notice),

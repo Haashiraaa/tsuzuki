@@ -38,7 +38,7 @@ def test_adding_a_site_nobody_supports_explains_what_is_supported() -> None:
 
     with tempfile.TemporaryDirectory() as folder:
         state = ApiState(root=Root(Path(folder), "test"))
-        with TestClient(create_app(state, sweep=False)) as client:
+        with TestClient(create_app(state, sweep=False, work=False)) as client:
             response = client.post("/api/series", json={"url": "https://unknown.example/a"})
     assert response.status_code == 422
     assert "Supported:" in response.json()["detail"]
