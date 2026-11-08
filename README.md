@@ -88,6 +88,29 @@ oldest request first, using aria2c when it is installed and the built-in downloa
 If the server stops, running downloads go back in the queue and carry on from where they stopped.
 `--max-waiting-gb` pauses the queue while finished-but-uncollected files fill that much disk.
 
+**Every browser gets its own library and queue, with no accounts.** The first time someone adds
+a series, the server gives their browser a random cookie (`tsuzuki_visitor`, kept a year; only
+a hash of it is stored). Series, episodes and downloaded files are shared, so if two people ask
+for the same episode it is downloaded once; what each person sees (library, counts, queue,
+"saved") is theirs. A file is deleted when the last person who asked for it has saved it.
+**Settings > Your library link** is a private link that brings a library back on another device
+or after clearing cookies. Anyone holding it can use that library.
+
+Fairness and limits, per visitor (change with `--max-open` and `--max-series`):
+
+- `--max-open` (default 12): episodes queued, downloading or waiting to be saved at once.
+  A batch that would go over is refused whole (HTTP 429).
+- `--max-series` (default 60) series in a library.
+- The queue is fair, not first come first served: the next download goes to whoever has the
+  fewest running, then by place in their own list, so one person queueing 12 episodes cannot
+  make everyone else wait behind them.
+- Adding a series that was read from its site in the last hour reuses it instead of asking
+  the site again.
+
+There is no per-IP rate limiting in the app; use Caddy's rate limiting if you need it. For a big
+disk (say 2-3 TB) raise `--max-waiting-gb` so the queue pauses only when uncollected files
+really fill it.
+
 Not built yet: pausing, and saving site profiles (those routes answer "not supported yet").
 
 ## Storage

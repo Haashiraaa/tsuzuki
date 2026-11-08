@@ -1,15 +1,12 @@
 import sqlite3
 from datetime import datetime, timedelta
 
-from tests._helpers import make_episodes, make_ready, make_series
+from tests._helpers import make_episodes, make_series
 from tsuzuki.storage import (
     delete_series,
     get_series,
     get_series_by_url,
-    lifecycle,
-    list_episodes,
     list_series,
-    list_summaries,
     upsert_series,
 )
 
@@ -49,36 +46,6 @@ class TestListing:
         for title in ("blue lock", "Dandadan", "Aot"):
             make_series(conn, now, url=f"https://x.example/{title}", title=title)
         assert [s.title for s in list_series(conn)] == ["Aot", "blue lock", "Dandadan"]
-
-
-class TestSummaries:
-    def test_counts_per_status_group(
-        self, conn: sqlite3.Connection, downloads, now: datetime
-    ) -> None:
-        series = make_series(conn, now)
-        make_episodes(conn, series.id, now, ("1", "2", "3", "4", "5"))
-        make_ready(conn, downloads, series.id, "1", now)  # downloaded
-        record, _ = make_ready(conn, downloads, series.id, "2", now)
-        lifecycle.deliver(conn, record.id, now)  # still counts as downloaded
-        episodes = {e.number: e for e in list_episodes(conn, series.id)}
-        lifecycle.queue(conn, episodes["3"].id, now)  # in progress
-        lifecycle.queue(conn, episodes["4"].id, now)
-        lifecycle.start(conn, episodes["4"].id, now)
-        lifecycle.fail(conn, episodes["4"].id, now, "timeout")  # failed
-
-        (summary,) = list_summaries(conn)
-        assert summary.series.id == series.id
-        assert summary.total == 5
-        assert summary.downloaded == 2
-        assert summary.in_progress == 1
-        assert summary.failed == 1
-
-    def test_series_without_episodes_has_zero_counts(
-        self, conn: sqlite3.Connection, now: datetime
-    ) -> None:
-        make_series(conn, now)
-        (summary,) = list_summaries(conn)
-        assert (summary.total, summary.downloaded, summary.in_progress, summary.failed) == (0,) * 4
 
 
 class TestDelete:

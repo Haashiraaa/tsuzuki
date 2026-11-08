@@ -57,3 +57,37 @@ class EpisodeRecord:
     attempts: int
     expires_at: datetime | None
     updated_at: datetime
+
+
+@dataclass(frozen=True)
+class RequestRecord:
+    """One visitor's request for one episode. ``delivered_at`` is set once they saved it."""
+
+    id: int
+    visitor_id: int
+    episode_id: int
+    requested_at: datetime
+    delivered_at: datetime | None
+
+
+def view_status(episode: EpisodeStatus, request: RequestRecord | None) -> EpisodeStatus:
+    """What one visitor should see for an episode. The file and download are shared, but
+    "delivered" is personal: it means this visitor saved it."""
+    if request is None:
+        return EpisodeStatus.AVAILABLE
+    if request.delivered_at is not None:
+        return EpisodeStatus.DELIVERED
+    return episode
+
+
+# Statuses a visitor can ask for again from their own point of view.
+REQUESTABLE_VIEW = frozenset(
+    {
+        EpisodeStatus.AVAILABLE,
+        EpisodeStatus.FAILED,
+        EpisodeStatus.DELIVERED,
+        EpisodeStatus.EXPIRED,
+    }
+)
+# Statuses that count toward a visitor's limit of episodes waiting at once.
+OPEN_VIEW = frozenset({EpisodeStatus.QUEUED, EpisodeStatus.DOWNLOADING, EpisodeStatus.READY})

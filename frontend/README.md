@@ -44,6 +44,8 @@ Each screen keeps its own components, CSS module and `queries.ts`. Screens only 
 | POST | `/api/episodes/:id/cancel` | Cancel |
 | GET | `/api/episodes/:id/file` | Save to this device; the server deletes its copy once delivered |
 | GET | `/api/episodes/:id/stream` | Play in the browser |
+| GET | `/api/me` | The private restore path for this browser's library (`null` before first use) |
+| GET | `/api/restore/:token` | Open in another browser to bring a library back (sets the cookie, redirects to `/`) |
 | GET | `/api/sites` | Known sites |
 | POST | `/api/sites/test` | Try a new site |
 | POST | `/api/sites/profiles` | Save a site profile |

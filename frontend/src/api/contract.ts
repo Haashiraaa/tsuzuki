@@ -31,6 +31,8 @@ export interface Api {
   fileUrl(episodeId: number): string;
   /** Link that plays a finished episode in the browser. */
   streamUrl(episodeId: number): string;
+  /** The private link that brings this library back in another browser; null before any use. */
+  getRestoreLink(): Promise<string | null>;
   listSites(): Promise<SiteInfo[]>;
   testSite(url: string): Promise<SiteTest>;
   saveSiteProfile(url: string): Promise<void>;

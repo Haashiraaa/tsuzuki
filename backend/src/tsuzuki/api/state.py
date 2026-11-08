@@ -4,7 +4,7 @@ import sqlite3
 from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from tsuzuki.core.progress import ProgressBoard
 from tsuzuki.core.root import Root
@@ -16,11 +16,21 @@ from tsuzuki.worker.job import PlanFactory, default_plan
 DEFAULT_SLOTS = 3
 
 
+@dataclass(frozen=True)
+class Limits:
+    """What one visitor may do, so nobody can fill the disk or hog the downloads."""
+
+    max_open: int = 12  # episodes waiting at once: queued, downloading, or ready but unsaved
+    max_series: int = 60  # series in one library
+    series_fresh_for: timedelta = timedelta(hours=1)  # re-adding a series this soon skips the site
+
+
 @dataclass
 class ApiState:
     root: Root
     retention: RetentionPolicy = field(default_factory=RetentionPolicy)
     slots: int = DEFAULT_SLOTS
+    limits: Limits = field(default_factory=Limits)
     progress: ProgressBoard = field(default_factory=ProgressBoard)
     # Both are replaceable so tests can run without the network or the real clock.
     resolve_site: Callable[[str], Site] = site_for

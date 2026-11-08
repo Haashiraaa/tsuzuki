@@ -7,7 +7,7 @@ from datetime import timedelta
 from pathlib import Path
 
 from tsuzuki.api.app import create_app
-from tsuzuki.api.state import DEFAULT_SLOTS, ApiState
+from tsuzuki.api.state import DEFAULT_SLOTS, ApiState, Limits
 from tsuzuki.core.root import resolve_root
 from tsuzuki.storage import RetentionPolicy
 
@@ -28,6 +28,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--slots", type=int, default=DEFAULT_SLOTS, help="downloads at once")
     parser.add_argument(
+        "--max-open",
+        type=int,
+        default=Limits.max_open,
+        help="episodes one visitor can have waiting",
+    )
+    parser.add_argument(
+        "--max-series", type=int, default=Limits.max_series, help="series in one visitor's library"
+    )
+    parser.add_argument(
         "--keep-hours", type=float, default=24, help="hours a finished file waits on the server"
     )
     parser.add_argument(
@@ -41,7 +50,10 @@ def build_parser() -> argparse.ArgumentParser:
 def state_from(args: argparse.Namespace) -> ApiState:
     cap = None if args.max_waiting_gb is None else int(args.max_waiting_gb * GIB)
     retention = RetentionPolicy(ttl=timedelta(hours=args.keep_hours), max_ready_bytes=cap)
-    return ApiState(root=resolve_root(args.output), retention=retention, slots=args.slots)
+    limits = Limits(max_open=args.max_open, max_series=args.max_series)
+    return ApiState(
+        root=resolve_root(args.output), retention=retention, slots=args.slots, limits=limits
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

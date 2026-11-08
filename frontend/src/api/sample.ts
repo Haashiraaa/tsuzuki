@@ -250,6 +250,8 @@ export const sampleApi: Api = {
   fileUrl: (id) => `#save-${id}`,
   streamUrl: (id) => `#play-${id}`,
 
+  getRestoreLink: () => settle("/api/restore/sample-link-not-real"),
+
   listSites: () => settle(SITES),
 
   testSite(url) {

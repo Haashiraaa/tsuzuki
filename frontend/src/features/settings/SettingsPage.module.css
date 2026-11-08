@@ -4,3 +4,34 @@
   line-height: 1.55;
   color: var(--muted);
 }
+
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.heading {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+  max-width: 62ch;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-small);
+  background: var(--raised);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
