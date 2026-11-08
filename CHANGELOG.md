@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.5.0...v0.6.0) (2026-11-08)
+
+
+### Features
+
+* **api:** add the web API over the SQLite storage ([#9](https://github.com/Haashiraaa/tsuzuki/issues/9)) ([566adc8](https://github.com/Haashiraaa/tsuzuki/commit/566adc85c9b90dd203a423e9ea24c75b13561e2b))
+
 ## [0.5.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.4.0...v0.5.0) (2026-11-08)
 
 
