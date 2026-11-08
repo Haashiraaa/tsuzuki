@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.8.1...v0.9.0) (2026-11-08)
+
+
+### Features
+
+* a private library, queue and limits for each visitor ([#20](https://github.com/Haashiraaa/tsuzuki/issues/20)) ([3833875](https://github.com/Haashiraaa/tsuzuki/commit/3833875263be80368f9e5b60550eb4df96838654))
+
 ## [0.8.1](https://github.com/Haashiraaa/tsuzuki/compare/v0.8.0...v0.8.1) (2026-11-08)
 
 
