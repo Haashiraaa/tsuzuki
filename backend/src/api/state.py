@@ -1,0 +1,54 @@
+"""What the routes share: where things live, the settings, and how to open the database."""
+
+import sqlite3
+from collections.abc import Callable, Generator
+from contextlib import contextmanager
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+
+from backend.src.core.progress import ProgressBoard
+from backend.src.core.root import Root
+from backend.src.sites.base import Site
+from backend.src.sites.registry import site_for
+from backend.src.storage import RetentionPolicy, connect, prepare_database, utc_now
+from backend.src.worker.job import PlanFactory, default_plan
+
+DEFAULT_SLOTS = 3
+
+
+@dataclass(frozen=True)
+class Limits:
+    """What one visitor may do, so nobody can fill the disk or hog the downloads."""
+
+    max_open: int = 12  # episodes waiting at once: queued, downloading, or ready but unsaved
+    max_series: int = 60  # series in one library
+    # re-adding a series this soon skips the site
+    series_fresh_for: timedelta = timedelta(hours=1)
+
+
+@dataclass
+class ApiState:
+    root: Root
+    retention: RetentionPolicy = field(default_factory=RetentionPolicy)
+    slots: int = DEFAULT_SLOTS
+    limits: Limits = field(default_factory=Limits)
+    progress: ProgressBoard = field(default_factory=ProgressBoard)
+    # Both are replaceable so tests can run without the network or the real clock.
+    resolve_site: Callable[[str], Site] = site_for
+    clock: Callable[[], datetime] = utc_now
+    make_plan: PlanFactory = default_plan
+    poll_seconds: float = 2.0  # how often an idle download slot looks for new work
+
+    def prepare(self) -> None:
+        """Create the database or bring it up to date. Run once, before serving requests."""
+        prepare_database(self.root.database)
+
+    @contextmanager
+    def database(self) -> Generator[sqlite3.Connection]:
+        """A connection for one request. SQLite connections belong to one thread, and each
+        request may run on a different one, so none is kept between requests."""
+        conn = connect(self.root.database)
+        try:
+            yield conn
+        finally:
+            conn.close()
