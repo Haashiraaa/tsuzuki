@@ -55,13 +55,13 @@ dev = [
 Repository = "https://github.com/Haashiraaa/tsuzuki"
 
 [project.scripts]
-tsuzuki = "tsuzuki.cli:main"
+tsuzuki = "backend.src.cli:main"
 
 [tool.setuptools]
-package-dir = { "" = "backend/src" }
+package-dir = { "" = "backend" }
 
 [tool.setuptools.packages.find]
-where = ["backend/src"]
+where = ["backend"]
 
 [tool.setuptools.package-data]
 tsuzuki = [
@@ -73,21 +73,21 @@ tsuzuki = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["backend/src"]
+pythonpath = ["backend"]
 addopts = "-ra"
 
 [tool.ruff]
 line-length = 100
 target-version = "py310"
-src = ["backend/src", "."]
+src = ["backend", "."]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["tsuzuki", "tests"]
+known-first-party = ["backend", "tests"]
 
 [tool.pyright]
-include = ["backend/src", "scripts", "tests"]
-strict = ["backend/src"]
+include = ["backend", "scripts", "tests"]
+strict = ["backend"]
 pythonVersion = "3.10"
