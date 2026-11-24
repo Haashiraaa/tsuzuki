@@ -5,13 +5,13 @@ from collections.abc import Sequence
 
 from fastapi import APIRouter, HTTPException, Response
 
-from backend.src.api.deps import State, episode_or_404
-from backend.src.api.schemas import QueueEpisodesIn, QueueOut
-from backend.src.api.state import ApiState
-from backend.src.api.views import queue_view
-from backend.src.api.visitor import RequiredVisitor, Visitor, Writer
-from backend.src.core.errors import InvalidTransitionError, LimitError
-from backend.src.storage import (
+from tsuzuki.api.deps import State, episode_or_404
+from tsuzuki.api.schemas import QueueEpisodesIn, QueueOut
+from tsuzuki.api.state import ApiState
+from tsuzuki.api.views import queue_view
+from tsuzuki.api.visitor import RequiredVisitor, Visitor, Writer
+from tsuzuki.core.errors import InvalidTransitionError, LimitError
+from tsuzuki.storage import (
     EpisodeStatus,
     cancel_request,
     get_episode,
@@ -22,7 +22,7 @@ from backend.src.storage import (
     transaction,
     view_status,
 )
-from backend.src.storage.records import OPEN_VIEW, REQUESTABLE_VIEW
+from tsuzuki.storage.records import OPEN_VIEW, REQUESTABLE_VIEW
 
 router = APIRouter()
 
