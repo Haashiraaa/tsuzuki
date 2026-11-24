@@ -14,8 +14,7 @@ class Site(Protocol):
 
     def fetch_series(self, url: str) -> Series: ...
 
-    def resolve_media(self, series: Series,
-                      episode: Episode) -> MediaSource: ...
+    def resolve_media(self, series: Series, episode: Episode) -> MediaSource: ...
 
 
 @dataclass(frozen=True)
