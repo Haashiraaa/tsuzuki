@@ -2,16 +2,16 @@
 
 from urllib.parse import urljoin
 
-from backend.src.core.models import Episode, MediaSource, Series
-from backend.src.net.http import fetch_text
-from backend.src.net.urls import origin
-from backend.src.sites.animeheaven.parsing import (
+from tsuzuki.core.models import Episode, MediaSource, Series
+from tsuzuki.net.http import fetch_text
+from tsuzuki.net.urls import origin
+from tsuzuki.sites.animeheaven.parsing import (
     make_soup,
     parse_episodes,
     parse_title,
     parse_video_url,
 )
-from backend.src.sites.base import SiteEntry
+from tsuzuki.sites.base import SiteEntry
 
 GATE_PATH = "gate.php"
 # the gate page only serves the video for the cookie holding the episode id
