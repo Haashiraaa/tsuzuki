@@ -6,12 +6,12 @@ from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from backend.src.core.progress import ProgressBoard
-from backend.src.core.root import Root
-from backend.src.sites.base import Site
-from backend.src.sites.registry import site_for
-from backend.src.storage import RetentionPolicy, connect, prepare_database, utc_now
-from backend.src.worker.job import PlanFactory, default_plan
+from tsuzuki.core.progress import ProgressBoard
+from tsuzuki.core.root import Root
+from tsuzuki.sites.base import Site
+from tsuzuki.sites.registry import site_for
+from tsuzuki.storage import RetentionPolicy, connect, prepare_database, utc_now
+from tsuzuki.worker.job import PlanFactory, default_plan
 
 DEFAULT_SLOTS = 3
 
