@@ -1,8 +1,8 @@
 import sqlite3
 from datetime import datetime
 
-from tsuzuki.storage import create_visitor, find_visitor
-from tsuzuki.storage.visitors import hash_token
+from backend.src.storage import create_visitor, find_visitor
+from backend.src.storage.visitors import hash_token
 
 
 def test_a_new_visitor_gets_a_secret_the_server_can_recognise(

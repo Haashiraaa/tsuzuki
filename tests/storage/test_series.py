@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime, timedelta
 
 from tests._helpers import make_episodes, make_series
-from tsuzuki.storage import (
+from backend.src.storage import (
     delete_series,
     get_series,
     get_series_by_url,
@@ -44,8 +44,10 @@ class TestUpsert:
 class TestListing:
     def test_sorted_by_title_ignoring_case(self, conn: sqlite3.Connection, now: datetime) -> None:
         for title in ("blue lock", "Dandadan", "Aot"):
-            make_series(conn, now, url=f"https://x.example/{title}", title=title)
-        assert [s.title for s in list_series(conn)] == ["Aot", "blue lock", "Dandadan"]
+            make_series(
+                conn, now, url=f"https://x.example/{title}", title=title)
+        assert [s.title for s in list_series(conn)] == [
+            "Aot", "blue lock", "Dandadan"]
 
 
 class TestDelete:

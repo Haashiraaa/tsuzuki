@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import pytest
 
 from tests._helpers import make_episodes, make_series
-from tsuzuki.core.errors import InvalidTransitionError
-from tsuzuki.storage import EpisodeStatus, get_episode, lifecycle
-from tsuzuki.storage.lifecycle import ALLOWED, can_move
+from backend.src.core.errors import InvalidTransitionError
+from backend.src.storage import EpisodeStatus, get_episode, lifecycle
+from backend.src.storage.lifecycle import ALLOWED, can_move
 
 S = EpisodeStatus
 
@@ -83,7 +83,8 @@ class TestHappyPath:
 
         delivered = lifecycle.deliver(conn, episode_id, now)
         assert delivered.status is S.DELIVERED
-        assert (delivered.file_path, delivered.size_bytes, delivered.expires_at) == (None,) * 3
+        assert (delivered.file_path, delivered.size_bytes,
+                delivered.expires_at) == (None,) * 3
 
     def test_expiry_clears_file_info_but_keeps_the_row(
         self, conn: sqlite3.Connection, now: datetime
@@ -91,7 +92,8 @@ class TestHappyPath:
         episode_id = one_episode(conn, now)
         lifecycle.queue(conn, episode_id, now)
         lifecycle.start(conn, episode_id, now)
-        lifecycle.finish(conn, episode_id, now, file_path="/d/x.mp4", size_bytes=1, expires_at=now)
+        lifecycle.finish(conn, episode_id, now,
+                         file_path="/d/x.mp4", size_bytes=1, expires_at=now)
         expired = lifecycle.expire(conn, episode_id, now)
         assert expired.status is S.EXPIRED
         assert expired.file_path is None
@@ -113,7 +115,8 @@ class TestFailureAndRetry:
         lifecycle.start(conn, episode_id, now)
         lifecycle.fail(conn, episode_id, now, "timed out")
         again = lifecycle.queue(conn, episode_id, now)
-        assert (again.status, again.error, again.attempts) == (S.QUEUED, None, 0)
+        assert (again.status, again.error,
+                again.attempts) == (S.QUEUED, None, 0)
 
     def test_a_cut_off_download_goes_back_to_the_queue_and_keeps_its_attempt(
         self, conn: sqlite3.Connection, now: datetime
@@ -138,7 +141,8 @@ class TestFailureAndRetry:
         episode_id = one_episode(conn, now)
         lifecycle.queue(conn, episode_id, now)
         lifecycle.start(conn, episode_id, now)
-        lifecycle.finish(conn, episode_id, now, file_path="/d/x", size_bytes=1, expires_at=now)
+        lifecycle.finish(conn, episode_id, now, file_path="/d/x",
+                         size_bytes=1, expires_at=now)
         lifecycle.deliver(conn, episode_id, now)
         assert lifecycle.queue(conn, episode_id, now).status is S.QUEUED
 
@@ -149,7 +153,8 @@ class TestRefusals:
     ) -> None:
         episode_id = one_episode(conn, now)
         with pytest.raises(InvalidTransitionError, match="available to ready"):
-            lifecycle.finish(conn, episode_id, now, file_path="/d/x", size_bytes=1, expires_at=now)
+            lifecycle.finish(conn, episode_id, now,
+                             file_path="/d/x", size_bytes=1, expires_at=now)
         assert status_of(conn, episode_id) is S.AVAILABLE
 
     def test_unknown_episode(self, conn: sqlite3.Connection, now: datetime) -> None:

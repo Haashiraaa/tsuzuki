@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from tests._helpers import make_library, make_ready, make_visitor
-from tsuzuki.storage import (
+from backend.src.storage import (
     EpisodeRecord,
     EpisodeStatus,
     RetentionPolicy,
@@ -71,9 +71,11 @@ class TestRequesting:
         second, _ = make_visitor(conn, now)
         add_to_library(conn, second, episode.series_id, now)
         request_episode(conn, first, episode.id, now, POLICY)
-        conn.execute("UPDATE episodes SET status = 'available' WHERE id = ?", (episode.id,))
+        conn.execute(
+            "UPDATE episodes SET status = 'available' WHERE id = ?", (episode.id,))
         record, _path = make_ready(
-            conn, downloads, episode.series_id, episode.number, now, ttl=timedelta(hours=1)
+            conn, downloads, episode.series_id, episode.number, now, ttl=timedelta(
+                hours=1)
         )
         later = now + timedelta(minutes=50)
         request_episode(conn, second, record.id, later, POLICY)
@@ -89,7 +91,8 @@ class TestRequesting:
         lifecycle.start(conn, episode.id, now)
         path = downloads / "e.mp4"
         path.write_bytes(b"x")
-        lifecycle.finish(conn, episode.id, now, file_path=str(path), size_bytes=1, expires_at=now)
+        lifecycle.finish(conn, episode.id, now, file_path=str(
+            path), size_bytes=1, expires_at=now)
         confirm_visitor_delivery(conn, downloads, visitor, episode.id, now)
         assert status(conn, episode.id) is S.DELIVERED
         assert request_episode(conn, visitor, episode.id, now, POLICY) is True
@@ -113,7 +116,8 @@ class TestWhatEachVisitorSees:
         first, episode = first_episode(conn, now)
         second, _ = make_visitor(conn, now)
         request_episode(conn, first, episode.id, now, POLICY)
-        assert set(requests_for_series(conn, first, episode.series_id)) == {episode.id}
+        assert set(requests_for_series(
+            conn, first, episode.series_id)) == {episode.id}
         assert requests_for_series(conn, second, episode.series_id) == {}
 
     def test_open_rows_lists_only_my_unsaved_requests_oldest_first(
@@ -124,7 +128,8 @@ class TestWhatEachVisitorSees:
         _series, episodes = make_library(conn, visitor, now)
         add_to_library(conn, other, _series.id, now)
         request_episode(conn, visitor, episodes[1].id, now, POLICY)
-        request_episode(conn, visitor, episodes[0].id, now + timedelta(seconds=1), POLICY)
+        request_episode(
+            conn, visitor, episodes[0].id, now + timedelta(seconds=1), POLICY)
         request_episode(conn, other, episodes[2].id, now, POLICY)
         rows = open_rows(conn, visitor)
         assert [r.episode.id for r in rows] == [episodes[1].id, episodes[0].id]
@@ -209,11 +214,14 @@ class TestDelivery:
         self, conn: sqlite3.Connection, downloads: Path, now: datetime
     ) -> None:
         visitors, episode_id, path = self.ready_for(conn, downloads, now, 3)
-        assert confirm_visitor_delivery(conn, downloads, visitors[0], episode_id, now) is False
-        assert confirm_visitor_delivery(conn, downloads, visitors[1], episode_id, now) is False
+        assert confirm_visitor_delivery(
+            conn, downloads, visitors[0], episode_id, now) is False
+        assert confirm_visitor_delivery(
+            conn, downloads, visitors[1], episode_id, now) is False
         assert path.exists()
         assert status(conn, episode_id) is S.READY
-        assert confirm_visitor_delivery(conn, downloads, visitors[2], episode_id, now) is True
+        assert confirm_visitor_delivery(
+            conn, downloads, visitors[2], episode_id, now) is True
         assert not path.exists()
         assert status(conn, episode_id) is S.DELIVERED
 

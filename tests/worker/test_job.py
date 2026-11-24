@@ -11,12 +11,12 @@ from tests.worker.conftest import (
     make_settings,
     queued_episode,
 )
-from tsuzuki.core.errors import DownloadError, SiteNotSupportedError
-from tsuzuki.core.progress import ProgressBoard
-from tsuzuki.download.pipeline import Notice
-from tsuzuki.storage import EpisodeRecord, EpisodeStatus, RetentionPolicy, claim_next, get_episode
-from tsuzuki.worker import run_episode
-from tsuzuki.worker.job import ARIA2, BUILT_IN
+from backend.src.core.errors import DownloadError, SiteNotSupportedError
+from backend.src.core.progress import ProgressBoard
+from backend.src.download.pipeline import Notice
+from backend.src.storage import EpisodeRecord, EpisodeStatus, RetentionPolicy, claim_next, get_episode
+from backend.src.worker import run_episode
+from backend.src.worker.job import ARIA2, BUILT_IN
 
 
 def claimed(conn: sqlite3.Connection, now: datetime, number: str = "1") -> EpisodeRecord:
@@ -67,11 +67,13 @@ def test_progress_reaches_the_board_while_downloading(
     def look(_index: int) -> None:
         progress = board.get(record.id)
         assert progress is not None
-        seen.append((progress.method, progress.bytes_done, progress.bytes_total))
+        seen.append(
+            (progress.method, progress.bytes_done, progress.bytes_total))
 
     downloader = FakeDownloader(size=1000, chunks=2, on_chunk=look)
     run_episode(
-        conn, record, make_settings(tmp_path, downloads), make_services(downloader, board, now)
+        conn, record, make_settings(
+            tmp_path, downloads), make_services(downloader, board, now)
     )
     assert seen[0][0] == ARIA2
     assert seen[1] == (ARIA2, 500, 1000)
@@ -111,7 +113,8 @@ def test_a_fall_back_to_the_built_in_downloader_shows_on_the_queue(
 
     def at_chunk(index: int) -> None:
         if index == 1:
-            notices[0]("aria2c failed. Falling back to the built-in downloader.")
+            notices[0](
+                "aria2c failed. Falling back to the built-in downloader.")
         progress = board.get(record.id)
         assert progress is not None
         methods.append(progress.method)
@@ -130,9 +133,11 @@ def test_a_failed_download_records_why(
     now: datetime,
 ) -> None:
     record = claimed(conn, now)
-    downloader = FakeDownloader(errors=[DownloadError("aria2c exited with code 3")])
+    downloader = FakeDownloader(
+        errors=[DownloadError("aria2c exited with code 3")])
     run_episode(
-        conn, record, make_settings(tmp_path, downloads), make_services(downloader, board, now)
+        conn, record, make_settings(
+            tmp_path, downloads), make_services(downloader, board, now)
     )
     failed = reload(conn, record)
     assert failed.status is EpisodeStatus.FAILED
@@ -181,7 +186,8 @@ def test_a_bug_fails_that_episode_and_not_the_worker(
     record = claimed(conn, now)
     downloader = FakeDownloader(errors=[RuntimeError("boom")])
     run_episode(
-        conn, record, make_settings(tmp_path, downloads), make_services(downloader, board, now)
+        conn, record, make_settings(
+            tmp_path, downloads), make_services(downloader, board, now)
     )
     failed = reload(conn, record)
     assert failed.status is EpisodeStatus.FAILED
@@ -203,7 +209,8 @@ def test_cancelling_mid_download_stops_it_and_removes_the_partial_file(
 
     downloader = FakeDownloader(on_chunk=cancel_after_first_chunk)
     run_episode(
-        conn, record, make_settings(tmp_path, downloads), make_services(downloader, board, now)
+        conn, record, make_settings(
+            tmp_path, downloads), make_services(downloader, board, now)
     )
     assert reload(conn, record).status is EpisodeStatus.AVAILABLE
     assert not (downloads / "Sample-Show" / "episode_1.mp4").exists()
@@ -221,7 +228,8 @@ def test_cancelling_before_the_download_starts_works_too(
     board.request_cancel(record.id)
     downloader = FakeDownloader()
     run_episode(
-        conn, record, make_settings(tmp_path, downloads), make_services(downloader, board, now)
+        conn, record, make_settings(
+            tmp_path, downloads), make_services(downloader, board, now)
     )
     assert reload(conn, record).status is EpisodeStatus.AVAILABLE
     assert downloader.calls == 0

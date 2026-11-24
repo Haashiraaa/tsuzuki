@@ -3,12 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from tsuzuki.storage import open_database, transaction
+from backend.src.storage import open_database, transaction
 
 
 class TestOpenDatabase:
     def test_creates_missing_folders(self, tmp_path: Path) -> None:
-        path = tmp_path / "deep" / "er" / "tsuzuki.db"
+        path = tmp_path / "deep" / "er" / "backend.src.db"
         conn = open_database(path)
         conn.close()
         assert path.is_file()

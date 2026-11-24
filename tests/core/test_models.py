@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from tsuzuki.core.errors import ConfigError, ParseError
-from tsuzuki.core.models import DownloadJob, MediaSource, Selection
+from backend.src.core.errors import ConfigError, ParseError
+from backend.src.core.models import DownloadJob, MediaSource, Selection
 
 
 class TestMediaSource:
@@ -20,7 +20,8 @@ class TestMediaSource:
 class TestSelection:
     def test_defaults(self) -> None:
         selection = Selection()
-        assert (selection.episode, selection.limit, selection.newest_first) == (None, None, True)
+        assert (selection.episode, selection.limit,
+                selection.newest_first) == (None, None, True)
 
     @pytest.mark.parametrize("value", [0, -1])
     def test_episode_must_be_one_or_more(self, value: int) -> None:
@@ -38,5 +39,6 @@ class TestSelection:
 
 
 def test_download_job_path() -> None:
-    job = DownloadJob(MediaSource("https://x.example/v.mp4"), Path("/d/Show"), "episode_1.mp4")
+    job = DownloadJob(MediaSource("https://x.example/v.mp4"),
+                      Path("/d/Show"), "episode_1.mp4")
     assert job.path == Path("/d/Show/episode_1.mp4")

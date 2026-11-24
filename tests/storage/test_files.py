@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 from tests._helpers import make_episodes, make_ready, make_series
-from tsuzuki.core.errors import InvalidTransitionError, StorageError
-from tsuzuki.storage import (
+from backend.src.core.errors import InvalidTransitionError, StorageError
+from backend.src.storage import (
     EpisodeStatus,
     confirm_delivery,
     get_episode,
@@ -85,7 +85,8 @@ class TestSweepExpired:
     ) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now)
-        old, old_path = make_ready(conn, downloads, series.id, "1", now, ttl=timedelta(hours=1))
+        old, old_path = make_ready(
+            conn, downloads, series.id, "1", now, ttl=timedelta(hours=1))
         fresh, fresh_path = make_ready(
             conn, downloads, series.id, "2", now, ttl=timedelta(hours=48)
         )
@@ -104,7 +105,8 @@ class TestSweepExpired:
     ) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now)
-        make_ready(conn, downloads, series.id, "1", now, ttl=timedelta(hours=1))
+        make_ready(conn, downloads, series.id, "1",
+                   now, ttl=timedelta(hours=1))
         later = now + timedelta(hours=2)
         assert len(sweep_expired(conn, downloads, later)) == 1
         assert sweep_expired(conn, downloads, later) == []
@@ -114,7 +116,8 @@ class TestSweepExpired:
     ) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now)
-        _, path = make_ready(conn, downloads, series.id, "1", now, ttl=timedelta(hours=1))
+        _, path = make_ready(conn, downloads, series.id,
+                             "1", now, ttl=timedelta(hours=1))
         path.unlink()
         (record,) = sweep_expired(conn, downloads, now + timedelta(hours=2))
         assert record.status is EpisodeStatus.EXPIRED

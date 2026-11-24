@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from tests._helpers import make_episodes, make_ready, make_series
-from tsuzuki.storage import RetentionPolicy, expiry_for, has_room
+from backend.src.storage import RetentionPolicy, expiry_for, has_room
 
 
 def test_default_ttl_is_a_day(now: datetime) -> None:
@@ -11,7 +11,8 @@ def test_default_ttl_is_a_day(now: datetime) -> None:
 
 
 def test_custom_ttl(now: datetime) -> None:
-    assert expiry_for(now, RetentionPolicy(ttl=timedelta(hours=2))) == now + timedelta(hours=2)
+    assert expiry_for(now, RetentionPolicy(
+        ttl=timedelta(hours=2))) == now + timedelta(hours=2)
 
 
 def test_no_cap_always_has_room(conn: sqlite3.Connection) -> None:

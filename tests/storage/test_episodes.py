@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from tests._helpers import make_episodes, make_ready, make_series
-from tsuzuki.storage import (
+from backend.src.storage import (
     EpisodeStatus,
     count_by_status,
     due_for_expiry,
@@ -17,12 +17,13 @@ from tsuzuki.storage import (
     ready_bytes,
     sync_episodes,
 )
-from tsuzuki.storage.episodes import ordinal_for
+from backend.src.storage.episodes import ordinal_for
 
 
 class TestOrdinal:
     @pytest.mark.parametrize(
-        ("number", "expected"), [("5", 5.0), ("05", 5.0), ("12.5", 12.5), (" 7 ", 7.0)]
+        ("number", "expected"), [("5", 5.0),
+                                 ("05", 5.0), ("12.5", 12.5), (" 7 ", 7.0)]
     )
     def test_numeric_numbers_sort_by_value(self, number: str, expected: float) -> None:
         assert ordinal_for(number, position=99) == expected
@@ -36,7 +37,8 @@ class TestSync:
         series = make_series(conn, now)
         added = sync_episodes(conn, series.id, [("2", "r2"), ("1", "r1")], now)
         assert added == 2
-        assert {e.status for e in list_episodes(conn, series.id)} == {EpisodeStatus.AVAILABLE}
+        assert {e.status for e in list_episodes(conn, series.id)} == {
+            EpisodeStatus.AVAILABLE}
 
     def test_syncing_again_adds_only_the_new_ones(
         self, conn: sqlite3.Connection, now: datetime
@@ -62,15 +64,18 @@ class TestListing:
     def test_orders_by_number_not_by_text(self, conn: sqlite3.Connection, now: datetime) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now, ("9", "10", "11"))
-        newest = [e.number for e in list_episodes(conn, series.id, newest_first=True)]
-        oldest = [e.number for e in list_episodes(conn, series.id, newest_first=False)]
+        newest = [e.number for e in list_episodes(
+            conn, series.id, newest_first=True)]
+        oldest = [e.number for e in list_episodes(
+            conn, series.id, newest_first=False)]
         assert newest == ["11", "10", "9"]
         assert oldest == ["9", "10", "11"]
 
     def test_limit(self, conn: sqlite3.Connection, now: datetime) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now, ("1", "2", "3", "4"))
-        assert [e.number for e in list_episodes(conn, series.id, limit=2)] == ["4", "3"]
+        assert [e.number for e in list_episodes(conn, series.id, limit=2)] == [
+            "4", "3"]
 
     def test_find_by_number(self, conn: sqlite3.Connection, now: datetime) -> None:
         series = make_series(conn, now)
@@ -86,7 +91,8 @@ class TestListing:
         lifecycle.queue(conn, one.id, now)
         lifecycle.queue(conn, two.id, now + timedelta(minutes=1))
         queued = list_by_status(conn, [EpisodeStatus.QUEUED])
-        assert [e.id for e in queued] == [one.id, two.id]  # first in, first out
+        assert [e.id for e in queued] == [
+            one.id, two.id]  # first in, first out
         assert list_by_status(conn, [EpisodeStatus.FAILED]) == []
 
 
@@ -97,7 +103,8 @@ class TestDiskAccounting:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now)
         make_ready(conn, downloads, series.id, "1", now, content=b"a" * 10)
-        record, _ = make_ready(conn, downloads, series.id, "2", now, content=b"b" * 5)
+        record, _ = make_ready(conn, downloads, series.id,
+                               "2", now, content=b"b" * 5)
         assert ready_bytes(conn) == 15
         lifecycle.deliver(conn, record.id, now)
         assert ready_bytes(conn) == 10
@@ -107,8 +114,10 @@ class TestDiskAccounting:
     ) -> None:
         series = make_series(conn, now)
         make_episodes(conn, series.id, now)
-        old, _ = make_ready(conn, downloads, series.id, "1", now, ttl=timedelta(hours=1))
-        make_ready(conn, downloads, series.id, "2", now, ttl=timedelta(hours=48))
+        old, _ = make_ready(conn, downloads, series.id,
+                            "1", now, ttl=timedelta(hours=1))
+        make_ready(conn, downloads, series.id, "2",
+                   now, ttl=timedelta(hours=48))
         assert due_for_expiry(conn, now) == []
         later = now + timedelta(hours=2)
         assert [e.id for e in due_for_expiry(conn, later)] == [old.id]
@@ -117,4 +126,5 @@ class TestDiskAccounting:
         series = make_series(conn, now)
         one, *_ = make_episodes(conn, series.id, now)
         lifecycle.queue(conn, one.id, now)
-        assert count_by_status(conn) == {EpisodeStatus.AVAILABLE: 2, EpisodeStatus.QUEUED: 1}
+        assert count_by_status(conn) == {
+            EpisodeStatus.AVAILABLE: 2, EpisodeStatus.QUEUED: 1}

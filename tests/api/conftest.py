@@ -10,12 +10,12 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from tsuzuki.api import ApiState, create_app
-from tsuzuki.api.visitor import COOKIE
-from tsuzuki.core.models import Episode, MediaSource, Series
-from tsuzuki.core.root import Root
-from tsuzuki.sites.base import Site
-from tsuzuki.storage import create_visitor, open_database
+from backend.src.api import ApiState, create_app
+from backend.src.api.visitor import COOKIE
+from backend.src.core.models import Episode, MediaSource, Series
+from backend.src.core.root import Root
+from backend.src.sites.base import Site
+from backend.src.storage import create_visitor, open_database
 
 SERIES_URL = "https://animeheaven.me/anime.php?abc12"
 

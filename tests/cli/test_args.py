@@ -2,8 +2,8 @@ import argparse
 
 import pytest
 
-from tsuzuki.cli.args import parse_args, positive_int, retry_from, selection_from
-from tsuzuki.core.models import Selection
+from backend.src.cli.args import parse_args, positive_int, retry_from, selection_from
+from backend.src.core.models import Selection
 
 
 class TestPositiveInt:
@@ -21,11 +21,13 @@ class TestParse:
     def test_defaults(self) -> None:
         args = parse_args(["--urls", "https://x.example/a"])
         assert args.urls == ["https://x.example/a"]
-        assert (args.workers, args.retries, args.debug, args.output) == (3, 5, False, None)
+        assert (args.workers, args.retries, args.debug,
+                args.output) == (3, 5, False, None)
         assert selection_from(args) == Selection()
 
     def test_several_urls(self) -> None:
-        assert len(parse_args(["--urls", "https://a/", "https://b/"]).urls) == 2
+        assert len(parse_args(
+            ["--urls", "https://a/", "https://b/"]).urls) == 2
 
     def test_urls_are_required(self, capsys: pytest.CaptureFixture[str]) -> None:
         with pytest.raises(SystemExit) as stop:
@@ -48,10 +50,11 @@ class TestParse:
         assert selection_from(args) == Selection(limit=3, newest_first=False)
 
     def test_retry_policy(self) -> None:
-        assert retry_from(parse_args(["--urls", "u", "--retries", "2"])).attempts == 2
+        assert retry_from(parse_args(
+            ["--urls", "u", "--retries", "2"])).attempts == 2
 
     def test_version_flag_exits_cleanly(self, capsys: pytest.CaptureFixture[str]) -> None:
         with pytest.raises(SystemExit) as stop:
             parse_args(["--version"])
         assert stop.value.code == 0
-        assert capsys.readouterr().out.startswith("tsuzuki ")
+        assert capsys.readouterr().out.startswith("backend.src ")

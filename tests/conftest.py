@@ -1,6 +1,6 @@
 """Shared fixtures.
 
-The tests mirror ``backend/src/tsuzuki``: ``tests/storage`` tests ``tsuzuki.storage``, and so on.
+The tests mirror ``backend/src/backend.src``: ``tests/storage`` tests ``tsuzuki.storage``, and so on.
 Nothing here touches the network, the real home folder or a real database: every test gets a
 fresh SQLite file under pytest's temporary folder.
 """
@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from tsuzuki.storage import open_database
+from backend.src.storage import open_database
 
 NOW = datetime(2026, 11, 8, 12, 0, tzinfo=timezone.utc)
 

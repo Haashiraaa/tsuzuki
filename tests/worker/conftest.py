@@ -9,15 +9,15 @@ from pathlib import Path
 
 import pytest
 
-from tsuzuki.core.events import ProgressHandler
-from tsuzuki.core.models import DownloadJob, Episode, MediaSource, Series
-from tsuzuki.core.progress import ProgressBoard
-from tsuzuki.core.retry import RetryPolicy
-from tsuzuki.download.base import Outcome
-from tsuzuki.download.pipeline import Notice
-from tsuzuki.download.plan import DownloadPlan
-from tsuzuki.sites.base import Site
-from tsuzuki.worker import Services, WorkerSettings
+from backend.src.core.events import ProgressHandler
+from backend.src.core.models import DownloadJob, Episode, MediaSource, Series
+from backend.src.core.progress import ProgressBoard
+from backend.src.core.retry import RetryPolicy
+from backend.src.download.base import Outcome
+from backend.src.download.pipeline import Notice
+from backend.src.download.plan import DownloadPlan
+from backend.src.sites.base import Site
+from backend.src.worker import Services, WorkerSettings
 
 NO_WAIT = RetryPolicy(attempts=2, base_delay=0.0, max_delay=0.0)
 ONCE = RetryPolicy(attempts=1)
@@ -52,7 +52,7 @@ class FakeDownloader:
     calls: int = 0
 
     def download(self, job: DownloadJob, on_progress: ProgressHandler) -> Outcome:
-        from tsuzuki.core.events import ProgressEvent
+        from backend.src.core.events import ProgressEvent
 
         self.calls += 1
         if self.errors:
@@ -65,7 +65,8 @@ class FakeDownloader:
                 handle.flush()
                 if self.on_chunk:
                     self.on_chunk(index)
-                on_progress(ProgressEvent(job.filename, step * index, self.size))
+                on_progress(ProgressEvent(
+                    job.filename, step * index, self.size))
         return "downloaded"
 
 
@@ -113,7 +114,7 @@ def make_settings(
 
 
 def queued_episode(conn: sqlite3.Connection, series_id: int, number: str, now: datetime) -> int:
-    from tsuzuki.storage import find_episode, lifecycle
+    from backend.src.storage import find_episode, lifecycle
 
     episode = find_episode(conn, series_id, number)
     assert episode is not None

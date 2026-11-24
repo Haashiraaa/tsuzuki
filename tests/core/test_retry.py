@@ -1,7 +1,7 @@
 import pytest
 
-from tsuzuki.core.errors import ConfigError, DownloadError, FetchError
-from tsuzuki.core.retry import RetryPolicy, backoff_delay, is_retryable, retry_call
+from backend.src.core.errors import ConfigError, DownloadError, FetchError
+from backend.src.core.retry import RetryPolicy, backoff_delay, is_retryable, retry_call
 
 
 class Flaky:
@@ -44,7 +44,8 @@ class TestPolicy:
 class TestRetryCall:
     def test_first_try_success_never_sleeps(self) -> None:
         slept: list[float] = []
-        assert retry_call(lambda: "ok", RetryPolicy(), sleep=slept.append) == "ok"
+        assert retry_call(lambda: "ok", RetryPolicy(),
+                          sleep=slept.append) == "ok"
         assert slept == []
 
     def test_retries_a_retryable_error_until_it_works(self) -> None:
@@ -54,7 +55,8 @@ class TestRetryCall:
         result = retry_call(
             flaky,
             RetryPolicy(attempts=5),
-            on_retry=lambda attempt, total, exc, delay: notices.append((attempt, total)),
+            on_retry=lambda attempt, total, exc, delay: notices.append(
+                (attempt, total)),
             sleep=slept.append,
         )
         assert (result, flaky.calls, len(slept)) == ("ok", 3, 2)

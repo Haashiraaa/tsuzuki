@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import pytest
 
-from tsuzuki.storage.times import from_text, to_text, utc_now
+from backend.src.storage.times import from_text, to_text, utc_now
 
 
 def test_round_trip() -> None:

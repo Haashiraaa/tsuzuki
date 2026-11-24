@@ -1,16 +1,18 @@
 import pytest
 
-from tsuzuki.core.errors import ConfigError
-from tsuzuki.net.urls import hostname, origin
+from backend.src.core.errors import ConfigError
+from backend.src.net.urls import hostname, origin
 
 
 def test_origin_drops_path_and_query() -> None:
-    assert origin("https://animeheaven.me/anime.php?abc") == "https://animeheaven.me/"
+    assert origin(
+        "https://animeheaven.me/anime.php?abc") == "https://animeheaven.me/"
 
 
 @pytest.mark.parametrize(
     ("url", "host"),
-    [("https://AnimeHeaven.ME/x", "animeheaven.me"), ("http://a.b.example:8080/", "a.b.example")],
+    [("https://AnimeHeaven.ME/x", "animeheaven.me"),
+     ("http://a.b.example:8080/", "a.b.example")],
 )
 def test_hostname_is_lowercase(url: str, host: str) -> None:
     assert hostname(url) == host

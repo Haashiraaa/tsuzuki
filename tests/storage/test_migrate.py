@@ -4,15 +4,16 @@ from pathlib import Path
 
 import pytest
 
-from tsuzuki.core.errors import StorageError
-from tsuzuki.storage.database import open_database, prepare_database
-from tsuzuki.storage.migrate import SCRIPTS, current_revision, head_revision, migrate
+from backend.src.core.errors import StorageError
+from backend.src.storage.database import open_database, prepare_database
+from backend.src.storage.migrate import SCRIPTS, current_revision, head_revision, migrate
 
 
 def tables(path: Path) -> set[str]:
     conn = sqlite3.connect(path)
     try:
-        rows = conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'").fetchall()
+        rows = conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table'").fetchall()
     finally:
         conn.close()
     return {row[0] for row in rows}

@@ -1,7 +1,7 @@
 import pytest
 
-from tsuzuki.core.errors import ParseError
-from tsuzuki.sites.animeheaven.parsing import (
+from backend.src.core.errors import ParseError
+from backend.src.sites.animeheaven.parsing import (
     make_soup,
     parse_episodes,
     parse_title,
@@ -38,7 +38,8 @@ class TestTitle:
 class TestEpisodes:
     def test_lists_episodes_in_page_order(self) -> None:
         episodes = parse_episodes(make_soup(SERIES_PAGE))
-        assert [(e.number, e.ref) for e in episodes] == [("12", "ref12"), ("11", "ref11")]
+        assert [(e.number, e.ref) for e in episodes] == [
+            ("12", "ref12"), ("11", "ref11")]
 
     def test_no_episodes_is_an_error(self) -> None:
         with pytest.raises(ParseError, match="No episodes"):
@@ -46,18 +47,22 @@ class TestEpisodes:
 
     def test_a_link_missing_its_number_is_an_error(self) -> None:
         with pytest.raises(ParseError, match="missing"):
-            parse_episodes(make_soup('<a href="gate.php" id="x"><div class="watch2"></div></a>'))
+            parse_episodes(
+                make_soup('<a href="gate.php" id="x"><div class="watch2"></div></a>'))
 
 
 class TestVideo:
     def test_relative_sources_are_made_absolute(self) -> None:
-        url = parse_video_url(make_soup(EPISODE_PAGE), "https://animeheaven.me/gate.php")
+        url = parse_video_url(make_soup(EPISODE_PAGE),
+                              "https://animeheaven.me/gate.php")
         assert url == "https://animeheaven.me/media/ep12.mp4"
 
     def test_video_tag_with_its_own_src(self) -> None:
         soup = make_soup('<video src="https://cdn.example/v.mp4"></video>')
-        assert parse_video_url(soup, "https://animeheaven.me/") == "https://cdn.example/v.mp4"
+        assert parse_video_url(
+            soup, "https://animeheaven.me/") == "https://cdn.example/v.mp4"
 
     def test_no_video_is_an_error(self) -> None:
         with pytest.raises(ParseError, match="video"):
-            parse_video_url(make_soup("<p>nothing</p>"), "https://animeheaven.me/")
+            parse_video_url(make_soup("<p>nothing</p>"),
+                            "https://animeheaven.me/")

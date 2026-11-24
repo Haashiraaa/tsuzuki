@@ -1,7 +1,7 @@
 import pytest
 
-from tsuzuki.core.errors import ParseError
-from tsuzuki.core.naming import episode_filename, folder_name
+from backend.src.core.errors import ParseError
+from backend.src.core.naming import episode_filename, folder_name
 
 
 class TestFolderName:
@@ -29,7 +29,8 @@ class TestFolderName:
 class TestEpisodeFilename:
     @pytest.mark.parametrize(
         ("number", "expected"),
-        [("5", "episode_5.mp4"), ("12.5", "episode_12.5.mp4"), (" 7 ", "episode_7.mp4")],
+        [("5", "episode_5.mp4"), ("12.5", "episode_12.5.mp4"),
+         (" 7 ", "episode_7.mp4")],
     )
     def test_plain_numbers(self, number: str, expected: str) -> None:
         assert episode_filename(number) == expected

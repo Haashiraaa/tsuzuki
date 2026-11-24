@@ -5,8 +5,8 @@ from fastapi.testclient import TestClient
 
 from tests._helpers import make_library, make_ready
 from tests.api.conftest import Me
-from tsuzuki.api import ApiState
-from tsuzuki.storage import (
+from backend.src.api import ApiState
+from backend.src.storage import (
     EpisodeStatus,
     add_to_library,
     find_episode,
@@ -31,7 +31,8 @@ def test_asking_for_episodes_queues_them(
     series, episodes = make_library(api_conn, me.id, now)
     response = client.post(
         "/api/downloads",
-        json={"seriesId": series.id, "episodeIds": [episodes[0].id, episodes[1].id]},
+        json={"seriesId": series.id, "episodeIds": [
+            episodes[0].id, episodes[1].id]},
     )
     assert response.status_code == 204
     assert status_of(api_conn, episodes[0].id) is S.QUEUED
@@ -76,8 +77,10 @@ def test_an_episode_from_another_series_is_refused_and_nothing_is_queued(
 def test_queue_lists_waiting_active_failed_and_finished(
     client: TestClient, api_conn: Connection, state: ApiState, me: Me, now: datetime
 ) -> None:
-    series, _ = make_library(api_conn, me.id, now, numbers=("1", "2", "3", "4"))
-    one, two, three, four = (find_episode(api_conn, series.id, n) for n in "1234")
+    series, _ = make_library(api_conn, me.id, now,
+                             numbers=("1", "2", "3", "4"))
+    one, two, three, four = (find_episode(
+        api_conn, series.id, n) for n in "1234")
     assert one and two and three and four
     for episode in (one, two, three, four):
         request_episode(api_conn, me.id, episode.id, now, state.retention)
@@ -88,8 +91,10 @@ def test_queue_lists_waiting_active_failed_and_finished(
     path = state.root.downloads / "Sample-Show" / "episode_1.mp4"
     path.parent.mkdir()
     path.write_bytes(b"x")
-    lifecycle.finish(api_conn, one.id, now, file_path=str(path), size_bytes=1, expires_at=now)
-    state.progress.update(three.id, done=0, total=1000, method="aria2 · 8 connections")
+    lifecycle.finish(api_conn, one.id, now, file_path=str(
+        path), size_bytes=1, expires_at=now)
+    state.progress.update(three.id, done=0, total=1000,
+                          method="aria2 · 8 connections")
     state.progress.update(three.id, done=250, total=1000)
 
     body = client.get("/api/queue").json()
@@ -135,7 +140,8 @@ def test_retry_puts_a_failed_episode_back_in_the_queue(
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
     lifecycle.start(api_conn, episodes[0].id, now)
     lifecycle.fail(api_conn, episodes[0].id, now, "boom")
-    assert client.post(f"/api/episodes/{episodes[0].id}/retry").status_code == 204
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/retry").status_code == 204
     assert status_of(api_conn, episodes[0].id) is S.QUEUED
 
 
@@ -145,7 +151,8 @@ def test_retry_on_a_running_episode_is_a_conflict(
     _series, episodes = make_library(api_conn, me.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
     lifecycle.start(api_conn, episodes[0].id, now)
-    assert client.post(f"/api/episodes/{episodes[0].id}/retry").status_code == 409
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/retry").status_code == 409
 
 
 def test_cancel_takes_a_waiting_episode_out_of_the_queue(
@@ -153,7 +160,8 @@ def test_cancel_takes_a_waiting_episode_out_of_the_queue(
 ) -> None:
     _series, episodes = make_library(api_conn, me.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
-    assert client.post(f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
     assert status_of(api_conn, episodes[0].id) is S.AVAILABLE
     assert get_request(api_conn, me.id, episodes[0].id) is None
 
@@ -164,7 +172,8 @@ def test_cancel_on_a_running_episode_asks_the_worker_to_stop(
     _series, episodes = make_library(api_conn, me.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
     lifecycle.start(api_conn, episodes[0].id, now)
-    assert client.post(f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
     assert state.progress.cancel_requested(episodes[0].id)
     assert status_of(api_conn, episodes[0].id) is S.DOWNLOADING
 
@@ -180,9 +189,11 @@ def test_cancelling_never_stops_a_download_someone_else_is_waiting_for(
     series, episodes = make_library(api_conn, me.id, now)
     add_to_library(api_conn, friend_me.id, series.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
-    request_episode(api_conn, friend_me.id, episodes[0].id, now, state.retention)
+    request_episode(api_conn, friend_me.id,
+                    episodes[0].id, now, state.retention)
     lifecycle.start(api_conn, episodes[0].id, now)
-    assert client.post(f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
     assert not state.progress.cancel_requested(episodes[0].id)
     assert get_request(api_conn, friend_me.id, episodes[0].id) is not None
 
@@ -191,7 +202,8 @@ def test_cancel_on_an_episode_i_never_asked_for_is_a_conflict(
     client: TestClient, api_conn: Connection, me: Me, now: datetime
 ) -> None:
     _series, episodes = make_library(api_conn, me.id, now)
-    assert client.post(f"/api/episodes/{episodes[0].id}/cancel").status_code == 409
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/cancel").status_code == 409
 
 
 def test_unknown_episode_is_404(client: TestClient, me: Me) -> None:
@@ -216,14 +228,16 @@ def test_a_ready_episode_can_be_withdrawn_without_deleting_it_for_others(
     series, episodes = make_library(api_conn, me.id, now)
     add_to_library(api_conn, friend_me.id, series.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
-    request_episode(api_conn, friend_me.id, episodes[0].id, now, state.retention)
+    request_episode(api_conn, friend_me.id,
+                    episodes[0].id, now, state.retention)
     lifecycle.start(api_conn, episodes[0].id, now)
     path = state.root.downloads / "x.mp4"
     path.write_bytes(b"x")
     lifecycle.finish(
         api_conn, episodes[0].id, now, file_path=str(path), size_bytes=1, expires_at=now
     )
-    assert client.post(f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
+    assert client.post(
+        f"/api/episodes/{episodes[0].id}/cancel").status_code == 204
     assert path.exists()
     assert status_of(api_conn, episodes[0].id) is S.READY
 
@@ -232,6 +246,7 @@ def test_helpers_still_build_ready_files(
     api_conn: Connection, state: ApiState, me: Me, now: datetime
 ) -> None:
     series, _ = make_library(api_conn, me.id, now)
-    record, path = make_ready(api_conn, state.root.downloads, series.id, "1", now)
+    record, path = make_ready(
+        api_conn, state.root.downloads, series.id, "1", now)
     assert path.exists()
     assert record.status is S.READY
