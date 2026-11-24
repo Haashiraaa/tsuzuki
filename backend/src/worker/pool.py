@@ -3,10 +3,10 @@
 import logging
 import threading
 
-from backend.src.storage import claim_next, connect, recover_interrupted
-from backend.src.worker.job import Services, WorkerSettings, run_episode
+from tsuzuki.storage import claim_next, connect, recover_interrupted
+from tsuzuki.worker.job import Services, WorkerSettings, run_episode
 
-log = logging.getLogger("backend.src.worker")
+log = logging.getLogger("tsuzuki.worker")
 
 STOP_WAIT_SECONDS = 15.0
 
