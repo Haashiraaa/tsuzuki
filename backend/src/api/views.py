@@ -3,7 +3,7 @@
 import sqlite3
 from pathlib import Path
 
-from backend.src.api.schemas import (
+from tsuzuki.api.schemas import (
     ActiveOut,
     EpisodeOut,
     FinishedOut,
@@ -11,8 +11,8 @@ from backend.src.api.schemas import (
     SeriesOut,
     WaitingOut,
 )
-from backend.src.core.progress import ProgressBoard
-from backend.src.storage import (
+from tsuzuki.core.progress import ProgressBoard
+from tsuzuki.storage import (
     EpisodeRecord,
     EpisodeStatus,
     RequestRecord,
