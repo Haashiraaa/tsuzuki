@@ -17,18 +17,15 @@ def positive_int(value: str) -> int:
     try:
         number = int(value)
     except ValueError:
-        raise argparse.ArgumentTypeError(
-            f"{value!r} is not an integer") from None
+        raise argparse.ArgumentTypeError(f"{value!r} is not an integer") from None
     if number < 1:
         raise argparse.ArgumentTypeError("must be 1 or greater")
     return number
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        prog="backend.src", description="Download anime episodes.")
-    parser.add_argument("--version", action="version",
-                        version=f"%(prog)s {__version__}")
+    parser = argparse.ArgumentParser(prog="tsuzuki", description="Download anime episodes.")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     add_source_options(parser)
     add_selection_options(parser)
     add_behaviour_options(parser)
@@ -36,8 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def add_source_options(parser: argparse.ArgumentParser) -> None:
-    parser.add_argument("--urls", nargs="+", required=True,
-                        metavar="URL", help="series page URLs")
+    parser.add_argument("--urls", nargs="+", required=True, metavar="URL", help="series page URLs")
     parser.add_argument(
         "-o", "--output", type=Path, help="root folder for Downloads/ and logs/ (default: auto)"
     )
@@ -45,10 +41,8 @@ def add_source_options(parser: argparse.ArgumentParser) -> None:
 
 def add_selection_options(parser: argparse.ArgumentParser) -> None:
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--episode", type=positive_int,
-                       help="download one episode by number")
-    group.add_argument("--limit", type=positive_int,
-                       help="download only N episodes")
+    group.add_argument("--episode", type=positive_int, help="download one episode by number")
+    group.add_argument("--limit", type=positive_int, help="download only N episodes")
     parser.add_argument(
         "--oldest", action="store_true", help="with --limit: take the oldest (default: newest)"
     )
@@ -67,8 +61,7 @@ def add_behaviour_options(parser: argparse.ArgumentParser) -> None:
         default=DEFAULT_RETRIES,
         help=f"attempts per network step (default: {DEFAULT_RETRIES})",
     )
-    parser.add_argument("-d", "--debug", action="store_true",
-                        help="verbose logging")
+    parser.add_argument("-d", "--debug", action="store_true", help="verbose logging")
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
