@@ -4,7 +4,7 @@ import argparse
 from collections.abc import Sequence
 from pathlib import Path
 
-from backend.src import __version__
+from tsuzuki import __version__
 from tsuzuki.core.models import Selection
 from tsuzuki.core.retry import RetryPolicy
 
