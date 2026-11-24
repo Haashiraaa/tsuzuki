@@ -9,10 +9,10 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
 
-from backend.src.core.errors import StorageError
-from backend.src.storage import lifecycle
-from backend.src.storage.episodes import get_episode
-from backend.src.storage.records import (
+from tsuzuki.core.errors import StorageError
+from tsuzuki.storage import lifecycle
+from tsuzuki.storage.episodes import get_episode
+from tsuzuki.storage.records import (
     OPEN_VIEW,
     REQUESTABLE_VIEW,
     EpisodeRecord,
@@ -20,9 +20,9 @@ from backend.src.storage.records import (
     RequestRecord,
     view_status,
 )
-from backend.src.storage.retention import RetentionPolicy, expiry_for
-from backend.src.storage.rows import episode_from_row
-from backend.src.storage.times import from_text, to_text
+from tsuzuki.storage.retention import RetentionPolicy, expiry_for
+from tsuzuki.storage.rows import episode_from_row
+from tsuzuki.storage.times import from_text, to_text
 
 S = EpisodeStatus
 
