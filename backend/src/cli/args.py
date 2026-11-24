@@ -24,7 +24,7 @@ def positive_int(value: str) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="tsuzuki", description="Download anime episodes.")
+    parser = argparse.ArgumentParser(prog="backend.src", description="Download anime episodes.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     add_source_options(parser)
     add_selection_options(parser)
