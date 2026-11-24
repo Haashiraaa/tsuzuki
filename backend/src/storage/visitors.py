@@ -11,7 +11,7 @@ import secrets
 import sqlite3
 from datetime import datetime
 
-from backend.src.storage.times import to_text
+from tsuzuki.storage.times import to_text
 
 
 def new_token() -> str:
