@@ -46,8 +46,7 @@ def add_series(body: AddSeriesIn, state: State, visitor: Writer) -> SeriesOut:
     limits = state.limits
     with state.database() as conn:
         known = get_series_by_url(conn, body.url)
-        already_mine = known is not None and in_library(
-            conn, visitor, known.id)
+        already_mine = known is not None and in_library(conn, visitor, known.id)
         if not already_mine and library_size(conn, visitor) >= limits.max_series:
             raise LimitError(
                 f"Your library is full ({limits.max_series} series). Remove one before adding more."
@@ -69,8 +68,7 @@ def add_series(body: AddSeriesIn, state: State, visitor: Writer) -> SeriesOut:
             add_to_library(conn, visitor, series_id, now)
         summary = get_summary(conn, visitor, series_id)
     if summary is None:
-        raise HTTPException(
-            500, "The series was saved but could not be read back")
+        raise HTTPException(500, "The series was saved but could not be read back")
     return series_view(summary)
 
 
@@ -85,8 +83,7 @@ def get_series_page(
     with state.database() as conn:
         summary = get_summary(conn, visitor, series_id)
         if summary is None:
-            raise HTTPException(
-                404, f"Series {series_id} is not in your library")
+            raise HTTPException(404, f"Series {series_id} is not in your library")
         episodes = list_episodes(
             conn, series_id, newest_first=order == "newest", limit=None if all else PAGE_SIZE
         )
@@ -94,8 +91,7 @@ def get_series_page(
         mine = requests_for_series(conn, visitor, series_id)
     return SeriesDetailOut(
         series=series_view(summary),
-        episodes=[episode_view(record, mine.get(record.id))
-                  for record in episodes],
+        episodes=[episode_view(record, mine.get(record.id)) for record in episodes],
         listed=listed,
         steps=built_in_steps(summary.series.site),
     )
