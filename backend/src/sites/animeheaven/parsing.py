@@ -7,8 +7,8 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup, Tag
 
-from backend.src.core.errors import ParseError
-from backend.src.core.models import Episode
+from tsuzuki.core.errors import ParseError
+from tsuzuki.core.models import Episode
 
 TITLE_META = 'meta[property="og:title"]'
 TITLE_FALLBACK = "title"
