@@ -104,8 +104,7 @@ def cancel(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
         if view_status(episode.status, mine) not in OPEN_VIEW:
 
         with transaction(conn):
-            stop_download = cancel_request(
-                conn, visitor, episode_id, state.clock())
+            stop_download = cancel_request(conn, visitor, episode_id, state.clock())
     if stop_download:
         state.progress.request_cancel(episode_id)
     return Response(status_code=NO_CONTENT)
