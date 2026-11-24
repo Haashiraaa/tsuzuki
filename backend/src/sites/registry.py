@@ -1,9 +1,9 @@
 """Find the adapter for a URL."""
 
-from backend.src.core.errors import SiteNotSupportedError
-from backend.src.net.urls import hostname
-from backend.src.sites import animeheaven
-from backend.src.sites.base import Site, SiteEntry
+from tsuzuki.core.errors import SiteNotSupportedError
+from tsuzuki.net.urls import hostname
+from tsuzuki.sites import animeheaven
+from tsuzuki.sites.base import Site, SiteEntry
 
 _ENTRIES: list[SiteEntry] = [animeheaven.ENTRY]
 
