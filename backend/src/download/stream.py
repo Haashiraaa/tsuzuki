@@ -9,11 +9,11 @@ from pathlib import Path
 
 import requests
 
-from backend.src.core.errors import DownloadError, FetchError
-from backend.src.core.events import ProgressEvent, ProgressHandler
-from backend.src.core.models import DownloadJob
-from backend.src.download.base import Outcome
-from backend.src.net.http import STREAM_TIMEOUT, merged_headers, to_fetch_error
+from tsuzuki.core.errors import DownloadError, FetchError
+from tsuzuki.core.events import ProgressEvent, ProgressHandler
+from tsuzuki.core.models import DownloadJob
+from tsuzuki.download.base import Outcome
+from tsuzuki.net.http import STREAM_TIMEOUT, merged_headers, to_fetch_error
 
 CHUNK_SIZE = 1024 * 1024
 RANGE_NOT_SATISFIABLE = 416
