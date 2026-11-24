@@ -12,10 +12,10 @@ from urllib.parse import quote
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 
-from backend.src.api.deps import State, episode_or_404
-from backend.src.api.state import ApiState
-from backend.src.api.visitor import RequiredVisitor
-from backend.src.storage import EpisodeRecord, EpisodeStatus, confirm_visitor_delivery, get_request
+from tsuzuki.api.deps import State, episode_or_404
+from tsuzuki.api.state import ApiState
+from tsuzuki.api.visitor import RequiredVisitor
+from tsuzuki.storage import EpisodeRecord, EpisodeStatus, confirm_visitor_delivery, get_request
 
 router = APIRouter()
 
