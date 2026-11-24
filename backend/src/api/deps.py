@@ -4,8 +4,8 @@ from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request
 
-from backend.src.api.state import ApiState
-from backend.src.storage import EpisodeRecord, get_episode
+from tsuzuki.api.state import ApiState
+from tsuzuki.storage import EpisodeRecord, get_episode
 
 
 def get_state(request: Request) -> ApiState:
