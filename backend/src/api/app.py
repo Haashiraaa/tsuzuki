@@ -106,6 +106,7 @@ def create_app(state: ApiState, *, sweep: bool = True, work: bool = True) -> Fas
     app.state.tsuzuki = state
 
     @app.exception_handler(TsuzukiError)
+    # pyright: ignore[reportUnusedFunction]
     def tsuzuki_error(_request: Request, error: TsuzukiError) -> JSONResponse:
         return JSONResponse({"detail": str(error)}, status_code=status_for(error))
 
