@@ -62,7 +62,7 @@ package-dir = { "" = "." }
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["backend*"]
+include = ["backend*", "tsuzuki*"]
 exclude = ["tests*"]
 
 [tool.setuptools.package-data]
