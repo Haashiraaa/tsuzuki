@@ -3,10 +3,10 @@
 import sqlite3
 from datetime import datetime
 
-from backend.src.core.errors import StorageError
-from backend.src.storage.records import SeriesRecord
-from backend.src.storage.rows import series_from_row
-from backend.src.storage.times import to_text
+from tsuzuki.core.errors import StorageError
+from tsuzuki.storage.records import SeriesRecord
+from tsuzuki.storage.rows import series_from_row
+from tsuzuki.storage.times import to_text
 
 
 def upsert_series(
