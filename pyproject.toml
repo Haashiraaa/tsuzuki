@@ -58,22 +58,24 @@ Repository = "https://github.com/Haashiraaa/tsuzuki"
 tsuzuki = "backend.src.cli:main"
 
 [tool.setuptools]
-package-dir = { "" = "backend" }
+package-dir = { "" = "." }
 
 [tool.setuptools.packages.find]
-where = ["backend"]
+where = ["."]
+include = ["backend*"]
+exclude = ["tests*"]
 
 [tool.setuptools.package-data]
-tsuzuki = [
-    "py.typed",
-    "storage/migrations/env.py",
-    "storage/migrations/script.py.mako",
-    "storage/migrations/versions/*.py",
+"backend.src" = ["py.typed"]
+"backend.src.storage" = [
+    "migrations/env.py",
+    "migrations/script.py.mako",
+    "migrations/versions/*.py",
 ]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["backend"]
+pythonpath = ["."]
 addopts = "-ra"
 
 [tool.ruff]
