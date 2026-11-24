@@ -102,8 +102,7 @@ def cancel(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
     with state.database() as conn:
         mine = get_request(conn, visitor, episode_id)
         if view_status(episode.status, mine) not in OPEN_VIEW:
-            raise InvalidTransitionError(
-                f"Episode {episode_id} is {episode.status.value}")
+
         with transaction(conn):
             stop_download = cancel_request(
                 conn, visitor, episode_id, state.clock())
