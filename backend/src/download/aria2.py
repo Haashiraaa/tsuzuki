@@ -11,11 +11,11 @@ import shutil
 import subprocess
 from collections.abc import Mapping
 
-from backend.src.core.errors import DownloadError
-from backend.src.core.events import ProgressEvent, ProgressHandler
-from backend.src.core.models import DownloadJob
-from backend.src.download.base import Outcome
-from backend.src.net.http import merged_headers
+from tsuzuki.core.errors import DownloadError
+from tsuzuki.core.events import ProgressEvent, ProgressHandler
+from tsuzuki.core.models import DownloadJob
+from tsuzuki.download.base import Outcome
+from tsuzuki.net.http import merged_headers
 
 EXECUTABLE = "aria2c"
 DEFAULT_CONNECTIONS = 8
