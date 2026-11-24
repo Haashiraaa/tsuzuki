@@ -2,11 +2,11 @@
 
 from collections.abc import Callable
 
-from backend.src.core.errors import DownloadError
-from backend.src.core.events import ProgressHandler
-from backend.src.core.models import DownloadJob
-from backend.src.download.base import Downloader, Outcome
-from backend.src.download.existing import is_complete
+from tsuzuki.core.errors import DownloadError
+from tsuzuki.core.events import ProgressHandler
+from tsuzuki.core.models import DownloadJob
+from tsuzuki.download.base import Downloader, Outcome
+from tsuzuki.download.existing import is_complete
 
 Notice = Callable[[str], None]
 
