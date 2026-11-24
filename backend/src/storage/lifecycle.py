@@ -13,10 +13,10 @@ UPDATE itself, so two workers cannot both win the same move.
 import sqlite3
 from datetime import datetime
 
-from backend.src.core.errors import InvalidTransitionError
-from backend.src.storage.episodes import get_episode
-from backend.src.storage.records import EpisodeRecord, EpisodeStatus
-from backend.src.storage.times import to_text
+from tsuzuki.core.errors import InvalidTransitionError
+from tsuzuki.storage.episodes import get_episode
+from tsuzuki.storage.records import EpisodeRecord, EpisodeStatus
+from tsuzuki.storage.times import to_text
 
 S = EpisodeStatus
 
