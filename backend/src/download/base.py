@@ -2,8 +2,8 @@
 
 from typing import Literal, Protocol
 
-from backend.src.core.events import ProgressHandler
-from backend.src.core.models import DownloadJob
+from tsuzuki.core.events import ProgressHandler
+from tsuzuki.core.models import DownloadJob
 
 Outcome = Literal["downloaded", "skipped"]
 
