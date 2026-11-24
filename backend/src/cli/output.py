@@ -8,8 +8,8 @@ from typing import Any
 from haashi.utility import Logger
 from tqdm import tqdm
 
-from backend.src.core.events import EpisodeEvent, Event, ProgressEvent, SeriesEvent
-from backend.src.core.report import RunReport
+from tsuzuki.core.events import EpisodeEvent, Event, ProgressEvent, SeriesEvent
+from tsuzuki.core.report import RunReport
 
 
 class ProgressBars:
