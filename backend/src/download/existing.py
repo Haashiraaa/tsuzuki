@@ -2,8 +2,8 @@
 
 import requests
 
-from backend.src.core.models import DownloadJob
-from backend.src.net.http import merged_headers
+from tsuzuki.core.models import DownloadJob
+from tsuzuki.net.http import merged_headers
 
 HEAD_TIMEOUT = 10.0
 
