@@ -2,8 +2,8 @@
 
 from urllib.parse import urlparse
 
-from backend.src.core.errors import ConfigError
-from backend.src.core.models import ALLOWED_SCHEMES
+from tsuzuki.core.errors import ConfigError
+from tsuzuki.core.models import ALLOWED_SCHEMES
 
 
 def origin(url: str) -> str:
