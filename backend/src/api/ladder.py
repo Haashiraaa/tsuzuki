@@ -38,8 +38,7 @@ def unknown_site_steps() -> list[StepOut]:
             summary="Not available yet",
             detail=NOT_BUILT,
         ),
-        StepOut(title="yt-dlp", outcome="missing",
-                summary="Not available yet", detail=NOT_BUILT),
+        StepOut(title="yt-dlp", outcome="missing", summary="Not available yet", detail=NOT_BUILT),
         StepOut(
             title="AI repair", outcome="skipped", summary="Not available yet", detail=NOT_BUILT
         ),
@@ -48,8 +47,7 @@ def unknown_site_steps() -> list[StepOut]:
 
 def skipped_rungs(detail: str) -> list[StepOut]:
     return [
-        StepOut(title=title, outcome="skipped",
-                summary="Skipped", detail=detail)
+        StepOut(title=title, outcome="skipped", summary="Skipped", detail=detail)
         for title in ("Generic detection", "yt-dlp", "AI repair")
     ]
 
