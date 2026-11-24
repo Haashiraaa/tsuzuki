@@ -8,10 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from backend.src.api.routes import downloads, files, me, series, sites
-from backend.src.api.state import ApiState
-from backend.src.api.visitor import VisitorMiddleware
-from backend.src.core.errors import (
+from tsuzuki.api.routes import downloads, files, me, series, sites
+from tsuzuki.api.state import ApiState
+from tsuzuki.api.visitor import VisitorMiddleware
+from tsuzuki.core.errors import (
     ConfigError,
     DownloadError,
     FetchError,
@@ -22,10 +22,10 @@ from backend.src.core.errors import (
     StorageError,
     TsuzukiError,
 )
-from backend.src.storage import sweep_expired
-from backend.src.worker import Services, WorkerPool, WorkerSettings
+from tsuzuki.storage import sweep_expired
+from tsuzuki.worker import Services, WorkerPool, WorkerSettings
 
-log = logging.getLogger("backend.src.api")
+log = logging.getLogger("tsuzuki.api")
 
 SWEEP_EVERY_SECONDS = 600
 
