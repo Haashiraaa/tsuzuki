@@ -6,13 +6,13 @@ from collections.abc import Sequence
 
 from haashi.utility import JsonlErrorLogger, Logger
 
-from backend.src.cli.args import parse_args, retry_from, selection_from
-from backend.src.cli.output import ConsoleReporter, print_summary
-from backend.src.core.errors import TsuzukiError
-from backend.src.core.root import Root, resolve_root
-from backend.src.core.service import DownloadRunner, RunOptions
-from backend.src.download.plan import DownloadPlan, plan_downloads
-from backend.src.sites.registry import site_for
+from tsuzuki.cli.args import parse_args, retry_from, selection_from
+from tsuzuki.cli.output import ConsoleReporter, print_summary
+from tsuzuki.core.errors import TsuzukiError
+from tsuzuki.core.root import Root, resolve_root
+from tsuzuki.core.service import DownloadRunner, RunOptions
+from tsuzuki.download.plan import DownloadPlan, plan_downloads
+from tsuzuki.sites.registry import site_for
 
 EXIT_OK = 0
 EXIT_FAILURE = 1
