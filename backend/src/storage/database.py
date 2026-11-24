@@ -11,8 +11,8 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
 
-from backend.src.core.errors import StorageError
-from backend.src.storage.migrate import migrate
+from tsuzuki.core.errors import StorageError
+from tsuzuki.storage.migrate import migrate
 
 BUSY_TIMEOUT_MS = 10_000
 
