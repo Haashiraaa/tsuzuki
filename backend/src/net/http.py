@@ -4,7 +4,7 @@ from collections.abc import Mapping
 
 import requests
 
-from backend.src.core.errors import FetchError
+from tsuzuki.core.errors import FetchError
 
 DEFAULT_USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
