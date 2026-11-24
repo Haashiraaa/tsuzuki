@@ -77,8 +77,7 @@ def run_aria2(command: list[str]) -> None:
     except FileNotFoundError as exc:
         raise DownloadError(f"{EXECUTABLE} not found") from exc
     except subprocess.CalledProcessError as exc:
-        raise DownloadError(
-            f"{EXECUTABLE} exited with code {exc.returncode}") from exc
+        raise DownloadError(f"{EXECUTABLE} exited with code {exc.returncode}") from exc
 
 
 # aria2c's one-line readout looks like: [#2089b0 400KiB/33MiB(1%) CN:1 DL:115KiB ETA:4m51s]
@@ -141,5 +140,4 @@ def run_aria2_captured(command: list[str], filename: str, on_progress: ProgressH
         process.wait()
         raise
     if code != 0:
-        raise DownloadError(
-            f"{EXECUTABLE} exited with code {code}: {tail.strip()}")
+        raise DownloadError(f"{EXECUTABLE} exited with code {code}: {tail.strip()}")
