@@ -6,10 +6,10 @@ from fastapi.testclient import TestClient
 
 from tests._helpers import make_library, make_ready
 from tests.api.conftest import Me
-from backend.src.api import ApiState
-from backend.src.api.app import sweep_once
-from backend.src.api.routes.files import send_then_deliver
-from backend.src.storage import (
+from tsuzuki.api import ApiState
+from tsuzuki.api.app import sweep_once
+from tsuzuki.api.routes.files import send_then_deliver
+from tsuzuki.storage import (
     EpisodeStatus,
     add_to_library,
     get_episode,
@@ -87,8 +87,7 @@ def test_the_file_stays_until_every_visitor_who_asked_has_saved_it(
     friend_me: Me,
     now: datetime,
 ) -> None:
-    episode_id, path = ready_episode(
-        api_conn, state, now, [me, friend_me], b"shared")
+    episode_id, path = ready_episode(api_conn, state, now, [me, friend_me], b"shared")
     assert client.get(f"/api/episodes/{episode_id}/file").content == b"shared"
     assert path.exists()  # my friend has not saved it yet
     assert friend.get(f"/api/episodes/{episode_id}/file").content == b"shared"
@@ -136,8 +135,7 @@ def test_a_browser_with_no_visitor_cannot_take_anything(
     now: datetime,
 ) -> None:
     episode_id, path = ready_episode(api_conn, state, now, [me])
-    assert app_client_without_cookie.get(
-        f"/api/episodes/{episode_id}/file").status_code == 404
+    assert app_client_without_cookie.get(f"/api/episodes/{episode_id}/file").status_code == 404
     assert path.exists()
 
 
@@ -155,10 +153,8 @@ def test_streaming_plays_the_file_and_keeps_it(
 def test_streaming_supports_seeking(
     client: TestClient, api_conn: Connection, state: ApiState, me: Me, now: datetime
 ) -> None:
-    episode_id, _path = ready_episode(
-        api_conn, state, now, [me], b"0123456789")
-    response = client.get(
-        f"/api/episodes/{episode_id}/stream", headers={"Range": "bytes=2-5"})
+    episode_id, _path = ready_episode(api_conn, state, now, [me], b"0123456789")
+    response = client.get(f"/api/episodes/{episode_id}/stream", headers={"Range": "bytes=2-5"})
     assert response.status_code == 206
     assert response.content == b"2345"
 
@@ -168,10 +164,8 @@ def test_an_episode_that_is_not_ready_cannot_be_fetched(
 ) -> None:
     _series, episodes = make_library(api_conn, me.id, now)
     request_episode(api_conn, me.id, episodes[0].id, now, state.retention)
-    assert client.get(
-        f"/api/episodes/{episodes[0].id}/file").status_code == 409
-    assert client.get(
-        f"/api/episodes/{episodes[0].id}/stream").status_code == 409
+    assert client.get(f"/api/episodes/{episodes[0].id}/file").status_code == 409
+    assert client.get(f"/api/episodes/{episodes[0].id}/stream").status_code == 409
 
 
 def test_unknown_episode_file_is_404(client: TestClient, me: Me) -> None:
@@ -199,8 +193,7 @@ def test_a_file_outside_the_downloads_folder_is_never_served(
     episode_id, path = ready_episode(api_conn, state, now, [me])
     outside = tmp_path / "secret.txt"
     outside.write_text("secret")
-    api_conn.execute(
-        "UPDATE episodes SET file_path = ? WHERE id = ?", (str(outside), episode_id))
+    api_conn.execute("UPDATE episodes SET file_path = ? WHERE id = ?", (str(outside), episode_id))
     assert client.get(f"/api/episodes/{episode_id}/file").status_code == 404
     assert client.get(f"/api/episodes/{episode_id}/stream").status_code == 404
     assert outside.exists()
@@ -246,8 +239,7 @@ def test_queueing_a_saved_episode_again_fetches_it_from_the_site(
 def test_a_browser_that_gives_up_half_way_does_not_cost_the_file(
     api_conn: Connection, state: ApiState, me: Me, now: datetime
 ) -> None:
-    episode_id, path = ready_episode(
-        api_conn, state, now, [me], b"x" * 3_000_000)
+    episode_id, path = ready_episode(api_conn, state, now, [me], b"x" * 3_000_000)
     stream = send_then_deliver(state, me.id, episode_id, path)
     next(stream)  # the first chunk goes out, then the connection drops
     stream.close()
@@ -259,6 +251,5 @@ def test_helper_files_exist_for_other_tests(
     api_conn: Connection, state: ApiState, me: Me, now: datetime
 ) -> None:
     series, _ = make_library(api_conn, me.id, now)
-    _record, path = make_ready(
-        api_conn, state.root.downloads, series.id, "1", now)
+    _record, path = make_ready(api_conn, state.root.downloads, series.id, "1", now)
     assert path.exists()

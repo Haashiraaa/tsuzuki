@@ -1,8 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.src.api.app import status_for
-from backend.src.core.errors import (
+from tsuzuki.api.app import status_for
+from tsuzuki.core.errors import (
     ConfigError,
     DownloadError,
     FetchError,
@@ -33,13 +33,12 @@ def test_adding_a_site_nobody_supports_explains_what_is_supported() -> None:
     import tempfile
     from pathlib import Path
 
-    from backend.src.api import ApiState, create_app
-    from backend.src.core.root import Root
+    from tsuzuki.api import ApiState, create_app
+    from tsuzuki.core.root import Root
 
     with tempfile.TemporaryDirectory() as folder:
         state = ApiState(root=Root(Path(folder), "test"))
         with TestClient(create_app(state, sweep=False, work=False)) as client:
-            response = client.post(
-                "/api/series", json={"url": "https://unknown.example/a"})
+            response = client.post("/api/series", json={"url": "https://unknown.example/a"})
     assert response.status_code == 422
     assert "Supported:" in response.json()["detail"]

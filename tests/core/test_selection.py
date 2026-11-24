@@ -1,8 +1,8 @@
 import pytest
 
-from backend.src.core.errors import EpisodeNotFoundError
-from backend.src.core.models import Episode, Selection
-from backend.src.core.selection import number_matches, select_episodes
+from tsuzuki.core.errors import EpisodeNotFoundError
+from tsuzuki.core.models import Episode, Selection
+from tsuzuki.core.selection import number_matches, select_episodes
 
 # the site lists newest first
 EPISODES = tuple(Episode(number=str(n), ref=f"r{n}") for n in (12, 11, 10, 9))
@@ -13,8 +13,7 @@ def numbers(chosen: list[Episode]) -> list[str]:
 
 
 def test_no_options_means_everything() -> None:
-    assert numbers(select_episodes(EPISODES, Selection())) == [
-        "12", "11", "10", "9"]
+    assert numbers(select_episodes(EPISODES, Selection())) == ["12", "11", "10", "9"]
 
 
 def test_one_episode_by_number() -> None:
@@ -27,8 +26,7 @@ def test_missing_episode_is_reported() -> None:
 
 
 def test_limit_takes_the_newest_by_default() -> None:
-    assert numbers(select_episodes(
-        EPISODES, Selection(limit=2))) == ["12", "11"]
+    assert numbers(select_episodes(EPISODES, Selection(limit=2))) == ["12", "11"]
 
 
 def test_limit_can_take_the_oldest() -> None:

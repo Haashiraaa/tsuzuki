@@ -1,4 +1,4 @@
-from backend.src.core.progress import Progress, ProgressBoard
+from tsuzuki.core.progress import Progress, ProgressBoard
 
 
 class Clock:
@@ -28,8 +28,7 @@ def test_percent_and_eta_from_updates() -> None:
 
 
 def test_unknown_total_means_zero_percent_and_no_eta() -> None:
-    progress = Progress("stream", bytes_done=500,
-                        bytes_total=0, bytes_per_second=10)
+    progress = Progress("stream", bytes_done=500, bytes_total=0, bytes_per_second=10)
     assert progress.percent == 0
     assert progress.eta_seconds is None
 

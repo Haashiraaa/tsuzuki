@@ -1,5 +1,5 @@
-from backend.src.download.hint import aria2_install_hint
-from backend.src.download.plan import plan_downloads
+from tsuzuki.download.hint import aria2_install_hint
+from tsuzuki.download.plan import plan_downloads
 
 
 def test_with_aria2_the_requested_workers_are_used() -> None:

@@ -36,6 +36,9 @@ dist/
 # User data / credentials
 *.sqlite3
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
 *.env
 
 # Diff files

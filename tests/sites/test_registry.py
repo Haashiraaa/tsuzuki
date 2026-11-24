@@ -1,17 +1,15 @@
 import pytest
 
-from backend.src.core.errors import ConfigError, SiteNotSupportedError
-from backend.src.sites.registry import host_matches, site_for, supported_hosts
+from tsuzuki.core.errors import ConfigError, SiteNotSupportedError
+from tsuzuki.sites.registry import host_matches, site_for, supported_hosts
 
 
 def test_known_host_gets_its_adapter() -> None:
-    assert site_for(
-        "https://animeheaven.me/anime.php?abc").name == "AnimeHeaven"
+    assert site_for("https://animeheaven.me/anime.php?abc").name == "AnimeHeaven"
 
 
 def test_a_subdomain_of_a_known_host_matches() -> None:
-    assert site_for(
-        "https://www.animeheaven.me/anime.php?abc").name == "AnimeHeaven"
+    assert site_for("https://www.animeheaven.me/anime.php?abc").name == "AnimeHeaven"
 
 
 def test_unknown_host_lists_what_is_supported() -> None:

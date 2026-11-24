@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from tests._helpers import make_episodes, make_library, make_ready, make_series, make_visitor
-from backend.src.storage import (
+from tsuzuki.storage import (
     EpisodeRecord,
     EpisodeStatus,
     RetentionPolicy,
@@ -63,8 +63,7 @@ def test_a_full_disk_allowance_pauses_the_queue(
     make_episodes(conn, series.id, now)
     make_ready(conn, downloads, series.id, "1", now, content=b"x" * 100)
     queue(conn, series.id, "2", now)
-    assert claim_next(conn, now, RetentionPolicy(
-        max_ready_bytes=100)) is not None
+    assert claim_next(conn, now, RetentionPolicy(max_ready_bytes=100)) is not None
     queue(conn, series.id, "3", now)
     assert claim_next(conn, now, RetentionPolicy(max_ready_bytes=50)) is None
 
@@ -101,8 +100,7 @@ class TestFairness:
     ) -> tuple[int, int, list[EpisodeRecord]]:
         big, _ = make_visitor(conn, now)
         small, _ = make_visitor(conn, now)
-        series, episodes = make_library(
-            conn, big, now, numbers=tuple(str(n) for n in range(1, 7)))
+        series, episodes = make_library(conn, big, now, numbers=tuple(str(n) for n in range(1, 7)))
         add_to_library(conn, small, series.id, now)
         return big, small, episodes
 
@@ -111,10 +109,8 @@ class TestFairness:
     ) -> None:
         big, small, episodes = self.setup_two(conn, now)
         for index, episode in enumerate(episodes[:5]):
-            request_episode(conn, big, episode.id, now +
-                            timedelta(seconds=index), NO_CAP)
-        request_episode(
-            conn, small, episodes[5].id, now + timedelta(seconds=60), NO_CAP)
+            request_episode(conn, big, episode.id, now + timedelta(seconds=index), NO_CAP)
+        request_episode(conn, small, episodes[5].id, now + timedelta(seconds=60), NO_CAP)
         order: list[int] = []
         for _ in range(6):
             claimed = claim_next(conn, now + timedelta(minutes=5), NO_CAP)
@@ -128,13 +124,10 @@ class TestFairness:
     ) -> None:
         big, small, episodes = self.setup_two(conn, now)
         for index, episode in enumerate(episodes[:5]):
-            request_episode(conn, big, episode.id, now +
-                            timedelta(seconds=index), NO_CAP)
+            request_episode(conn, big, episode.id, now + timedelta(seconds=index), NO_CAP)
         for _ in range(3):  # three slots all busy with the big visitor's downloads
-            assert claim_next(
-                conn, now + timedelta(minutes=1), NO_CAP) is not None
-        request_episode(
-            conn, small, episodes[5].id, now + timedelta(minutes=2), NO_CAP)
+            assert claim_next(conn, now + timedelta(minutes=1), NO_CAP) is not None
+        request_episode(conn, small, episodes[5].id, now + timedelta(minutes=2), NO_CAP)
         claimed = claim_next(conn, now + timedelta(minutes=3), NO_CAP)
         assert claimed is not None
         assert claimed.id == episodes[5].id
@@ -144,10 +137,8 @@ class TestFairness:
     ) -> None:
         big, small, episodes = self.setup_two(conn, now)
         request_episode(conn, big, episodes[0].id, now, NO_CAP)
-        request_episode(
-            conn, small, episodes[0].id, now + timedelta(seconds=1), NO_CAP)
-        request_episode(
-            conn, small, episodes[1].id, now + timedelta(seconds=2), NO_CAP)
+        request_episode(conn, small, episodes[0].id, now + timedelta(seconds=1), NO_CAP)
+        request_episode(conn, small, episodes[1].id, now + timedelta(seconds=2), NO_CAP)
         first = claim_next(conn, now + timedelta(minutes=1), NO_CAP)
         assert first is not None
         assert first.id == episodes[0].id

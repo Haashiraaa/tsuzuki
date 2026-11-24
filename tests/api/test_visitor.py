@@ -7,9 +7,9 @@ from fastapi.testclient import TestClient
 
 from tests._helpers import make_library, make_series
 from tests.api.conftest import SERIES_URL, Me
-from backend.src.api import ApiState, Limits
-from backend.src.api.visitor import COOKIE
-from backend.src.storage import request_episode
+from tsuzuki.api import ApiState, Limits
+from tsuzuki.api.visitor import COOKIE
+from tsuzuki.storage import request_episode
 
 
 def test_looking_around_creates_nobody(client: TestClient, api_conn: Connection) -> None:
@@ -62,22 +62,17 @@ def test_queues_are_separate_but_the_download_is_shared(
     theirs = friend.post("/api/series", json={"url": SERIES_URL}).json()
     assert mine["id"] == theirs["id"]  # one shared series
     episode = client.get(f"/api/series/{mine['id']}").json()["episodes"][0]
-    client.post("/api/downloads",
-                json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
+    client.post("/api/downloads", json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
 
     assert len(client.get("/api/queue").json()["waiting"]) == 1
     assert friend.get("/api/queue").json()["waiting"] == []
-    mine_now = client.get(
-        f"/api/series/{mine['id']}").json()["episodes"][0]["status"]
-    theirs_now = friend.get(
-        f"/api/series/{mine['id']}").json()["episodes"][0]["status"]
+    mine_now = client.get(f"/api/series/{mine['id']}").json()["episodes"][0]["status"]
+    theirs_now = friend.get(f"/api/series/{mine['id']}").json()["episodes"][0]["status"]
     assert (mine_now, theirs_now) == ("queued", "available")
 
-    friend.post("/api/downloads",
-                json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
+    friend.post("/api/downloads", json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
     assert (
-        api_conn.execute(
-            "SELECT COUNT(*) FROM episodes WHERE status = 'queued'").fetchone()[0] == 1
+        api_conn.execute("SELECT COUNT(*) FROM episodes WHERE status = 'queued'").fetchone()[0] == 1
     )
     assert len(friend.get("/api/queue").json()["waiting"]) == 1
 
@@ -88,8 +83,7 @@ def test_library_counts_are_only_about_me(
     mine = client.post("/api/series", json={"url": SERIES_URL}).json()
     friend.post("/api/series", json={"url": SERIES_URL})
     episode = client.get(f"/api/series/{mine['id']}").json()["episodes"][0]
-    client.post("/api/downloads",
-                json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
+    client.post("/api/downloads", json={"seriesId": mine["id"], "episodeIds": [episode["id"]]})
     assert client.get("/api/series").json()[0]["inProgress"] == 1
     assert friend.get("/api/series").json()[0]["inProgress"] == 0
 
@@ -150,8 +144,7 @@ class TestRestoreLink:
         assert len(friend.get("/api/series").json()) == 1
 
     def test_a_made_up_link_does_nothing(self, friend: TestClient) -> None:
-        response = friend.get(
-            "/api/restore/not-a-real-token", follow_redirects=False)
+        response = friend.get("/api/restore/not-a-real-token", follow_redirects=False)
         assert response.status_code == 404
         assert "set-cookie" not in response.headers
 
@@ -166,8 +159,7 @@ class TestLimits:
         )
         response = client.post(
             "/api/downloads",
-            json={"seriesId": series.id, "episodeIds": [
-                e.id for e in episodes]},
+            json={"seriesId": series.id, "episodeIds": [e.id for e in episodes]},
         )
         assert response.status_code == 429
         assert "up to 3" in response.json()["detail"]
@@ -198,7 +190,7 @@ class TestLimits:
     ) -> None:
         state.limits = Limits(max_open=1)
         series, episodes = make_library(api_conn, me.id, now)
-        from backend.src.storage import add_to_library
+        from tsuzuki.storage import add_to_library
 
         add_to_library(api_conn, friend_me.id, series.id, now)
         for browser, episode in ((client, episodes[0]), (friend, episodes[1])):
@@ -223,10 +215,8 @@ class TestLimits:
         self, client: TestClient, state: ApiState
     ) -> None:
         state.limits = Limits(max_series=1)
-        assert client.post(
-            "/api/series", json={"url": SERIES_URL}).status_code == 200
-        assert client.post(
-            "/api/series", json={"url": SERIES_URL}).status_code == 200
+        assert client.post("/api/series", json={"url": SERIES_URL}).status_code == 200
+        assert client.post("/api/series", json={"url": SERIES_URL}).status_code == 200
         other = client.post("/api/series", json={"url": SERIES_URL + "x"})
         assert other.status_code == 429
         assert "library is full" in other.json()["detail"]

@@ -5,8 +5,8 @@ from pathlib import Path
 
 from tests._helpers import make_episodes, make_series
 from tests.worker.conftest import FakeDownloader, make_services, make_settings, queued_episode
-from backend.src.core.progress import ProgressBoard
-from backend.src.storage import (
+from tsuzuki.core.progress import ProgressBoard
+from tsuzuki.storage import (
     EpisodeStatus,
     RetentionPolicy,
     connect,
@@ -14,7 +14,7 @@ from backend.src.storage import (
     lifecycle,
     open_database,
 )
-from backend.src.worker import WorkerPool, WorkerSettings
+from tsuzuki.worker import WorkerPool, WorkerSettings
 
 
 def wait_until(condition: Callable[[], bool], seconds: float = 5.0) -> bool:
@@ -48,8 +48,7 @@ def test_the_pool_runs_every_queued_episode(
     pool = WorkerPool(settings, make_services(FakeDownloader(), board, now))
     pool.start()
     try:
-        assert wait_until(lambda: statuses(settings, ids)
-                          == [EpisodeStatus.READY] * 5)
+        assert wait_until(lambda: statuses(settings, ids) == [EpisodeStatus.READY] * 5)
     finally:
         pool.stop()
     assert len(list((downloads / "Sample-Show").glob("*.mp4"))) == 5
@@ -66,8 +65,7 @@ def test_episodes_queued_after_start_are_picked_up(
     pool.start()
     try:
         late = queued_episode(conn, series.id, "2", now)
-        assert wait_until(lambda: statuses(
-            settings, [late]) == [EpisodeStatus.READY])
+        assert wait_until(lambda: statuses(settings, [late]) == [EpisodeStatus.READY])
     finally:
         pool.stop()
         conn.close()
@@ -81,15 +79,13 @@ def test_a_download_cut_off_by_a_crash_is_finished_after_a_restart(
     series = make_series(conn, now)
     make_episodes(conn, series.id, now)
     stuck = queued_episode(conn, series.id, "1", now)
-    # the server died while this was downloading
-    lifecycle.start(conn, stuck, now)
+    lifecycle.start(conn, stuck, now)  # the server died while this was downloading
     conn.close()
 
     pool = WorkerPool(settings, make_services(FakeDownloader(), board, now))
     pool.start()
     try:
-        assert wait_until(lambda: statuses(
-            settings, [stuck]) == [EpisodeStatus.READY])
+        assert wait_until(lambda: statuses(settings, [stuck]) == [EpisodeStatus.READY])
     finally:
         pool.stop()
 
@@ -113,12 +109,10 @@ def test_a_full_allowance_holds_back_the_rest_of_the_queue(
     second = queued_episode(conn, series.id, "2", now + timedelta(seconds=1))
     conn.close()
 
-    pool = WorkerPool(settings, make_services(
-        FakeDownloader(size=1000), board, now))
+    pool = WorkerPool(settings, make_services(FakeDownloader(size=1000), board, now))
     pool.start()
     try:
-        assert wait_until(lambda: statuses(settings, [first])[
-                          0] is EpisodeStatus.READY)
+        assert wait_until(lambda: statuses(settings, [first])[0] is EpisodeStatus.READY)
         time.sleep(0.3)
         assert statuses(settings, [second]) == [EpisodeStatus.QUEUED]
     finally:
@@ -141,8 +135,7 @@ def test_stopping_the_pool_puts_a_running_download_back_in_the_queue(
         started["yes"] = True
         time.sleep(0.2)
 
-    pool = WorkerPool(settings, make_services(
-        FakeDownloader(chunks=10, on_chunk=slow), board, now))
+    pool = WorkerPool(settings, make_services(FakeDownloader(chunks=10, on_chunk=slow), board, now))
     pool.start()
     assert wait_until(lambda: started["yes"])
     pool.stop()

@@ -1,7 +1,7 @@
 from datetime import timedelta
 from pathlib import Path
 
-from backend.src.api.__main__ import build_parser, state_from
+from tsuzuki.api.__main__ import build_parser, state_from
 
 
 def test_defaults_listen_on_this_computer_only() -> None:
@@ -12,8 +12,7 @@ def test_defaults_listen_on_this_computer_only() -> None:
 
 def test_settings_reach_the_state(tmp_path: Path) -> None:
     args = build_parser().parse_args(
-        ["-o", str(tmp_path), "--slots", "2", "--keep-hours",
-         "6", "--max-waiting-gb", "1.5"]
+        ["-o", str(tmp_path), "--slots", "2", "--keep-hours", "6", "--max-waiting-gb", "1.5"]
     )
     state = state_from(args)
     assert state.root.path == tmp_path.resolve()
