@@ -2,8 +2,8 @@
 
 import sqlite3
 
-from backend.src.storage.records import EpisodeRecord, EpisodeStatus, SeriesRecord
-from backend.src.storage.times import from_text
+from tsuzuki.storage.records import EpisodeRecord, EpisodeStatus, SeriesRecord
+from tsuzuki.storage.times import from_text
 
 
 def series_from_row(row: sqlite3.Row) -> SeriesRecord:
