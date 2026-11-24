@@ -4,7 +4,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Protocol
 
-from backend.src.core.models import Episode, MediaSource, Series
+from tsuzuki.core.models import Episode, MediaSource, Series
 
 
 class Site(Protocol):
