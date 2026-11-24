@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.9.0...v0.10.0) (2026-11-24)
+
+
+### ⚠ BREAKING CHANGES
+
+* restructure the backend into feature packages ([#23](https://github.com/Haashiraaa/tsuzuki/issues/23))
+
+### Features
+
+* restructure the backend into feature packages ([#23](https://github.com/Haashiraaa/tsuzuki/issues/23)) ([9bbe5cd](https://github.com/Haashiraaa/tsuzuki/commit/9bbe5cdfc047a5724ff514464d0bf007c6841d24))
+
 ## [0.9.0](https://github.com/Haashiraaa/tsuzuki/compare/v0.8.1...v0.9.0) (2026-11-08)
 
 
