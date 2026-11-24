@@ -45,18 +45,16 @@ def ask_for(
     for episode_id in wanted:
         episode = get_episode(conn, episode_id)
         if episode is None or (series_id is not None and episode.series_id != series_id):
-            raise HTTPException(
-                404, f"Episode {episode_id} is not part of this series")
+            raise HTTPException(404, f"Episode {episode_id} is not part of this series")
         if not in_library(conn, visitor, episode.series_id):
-            raise HTTPException(
-                404, f"Episode {episode_id} is not in your library")
+            raise HTTPException(404, f"Episode {episode_id} is not in your library")
         if view_status(episode.status, get_request(conn, visitor, episode_id)) in REQUESTABLE_VIEW:
             new.append(episode_id)
     limit = state.limits.max_open
     waiting = open_count(conn, visitor)
     if waiting + len(new) > limit:
         if waiting == 0:
-
+            raise LimitError(f"You can queue up to {limit} episodes at a time. Pick fewer.")
         raise LimitError(
             f"You can have up to {limit} episodes waiting at once and already have {waiting}. "
             "Save or cancel some, then try again."
@@ -71,7 +69,8 @@ def ask_for(
 def queue_episodes(body: QueueEpisodesIn, state: State, visitor: Writer) -> Response:
     with state.database() as conn:
         if not in_library(conn, visitor, body.series_id):
-
+            raise HTTPException(404, f"Series {body.series_id} is not in your library")
+        ask_for(state, conn, visitor, body.episode_ids, series_id=body.series_id)
     return Response(status_code=NO_CONTENT)
 
 
@@ -89,7 +88,7 @@ def retry(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
     with state.database() as conn:
         mine = get_request(conn, visitor, episode_id)
         if view_status(episode.status, mine) not in REQUESTABLE_VIEW:
-
+            raise InvalidTransitionError(f"Episode {episode_id} is {episode.status.value}")
         ask_for(state, conn, visitor, [episode_id])
     return Response(status_code=NO_CONTENT)
 
@@ -102,7 +101,7 @@ def cancel(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
     with state.database() as conn:
         mine = get_request(conn, visitor, episode_id)
         if view_status(episode.status, mine) not in OPEN_VIEW:
-
+            raise InvalidTransitionError(f"Episode {episode_id} is {episode.status.value}")
         with transaction(conn):
             stop_download = cancel_request(conn, visitor, episode_id, state.clock())
     if stop_download:
