@@ -1,4 +1,4 @@
-"""``python -m backend.src.api``: start the server."""
+"""``python -m tsuzuki.api``: start the server."""
 
 import argparse
 import sys
@@ -6,10 +6,10 @@ from collections.abc import Sequence
 from datetime import timedelta
 from pathlib import Path
 
-from backend.src.api.app import create_app
-from backend.src.api.state import DEFAULT_SLOTS, ApiState, Limits
-from backend.src.core.root import resolve_root
-from backend.src.storage import RetentionPolicy
+from tsuzuki.api.app import create_app
+from tsuzuki.api.state import DEFAULT_SLOTS, ApiState, Limits
+from tsuzuki.core.root import resolve_root
+from tsuzuki.storage import RetentionPolicy
 
 LOOPBACK = ("127.0.0.1", "localhost", "::1")
 GIB = 1024**3
@@ -17,7 +17,7 @@ GIB = 1024**3
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="python -m backend.src.api", description="Run the Tsuzuki server."
+        prog="python -m tsuzuki.api", description="Run the Tsuzuki server."
     )
     parser.add_argument(
         "--host", default="127.0.0.1", help="address to listen on (default: this computer only)"
