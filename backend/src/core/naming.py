@@ -20,6 +20,5 @@ def episode_filename(number: str, extension: str = "mp4") -> str:
     """Episode number -> ``episode_<number>.<ext>`` with path separators and junk removed."""
     safe = _FILE_UNSAFE.sub("_", number.strip()).strip("._")
     if not safe:
-        raise ParseError(
-            f"Episode number {number!r} cannot be used in a file name")
+        raise ParseError(f"Episode number {number!r} cannot be used in a file name")
     return f"episode_{safe}.{extension}"
