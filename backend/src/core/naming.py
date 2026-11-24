@@ -2,7 +2,7 @@
 
 import re
 
-from backend.src.core.errors import ParseError
+from tsuzuki.core.errors import ParseError
 
 _FOLDER_UNSAFE = re.compile(r"[^\w\s-]")
 _FOLDER_SPACES = re.compile(r"[\s-]+")
