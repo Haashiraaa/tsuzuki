@@ -4,7 +4,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from backend.src.storage.episodes import ready_bytes
+from tsuzuki.storage.episodes import ready_bytes
 
 DEFAULT_TTL = timedelta(hours=24)
 
