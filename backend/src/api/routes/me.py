@@ -3,10 +3,10 @@
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 
-from backend.src.api.deps import State
-from backend.src.api.schemas import MeOut
-from backend.src.api.visitor import RESTORE_PREFIX, Visitor
-from backend.src.storage import find_visitor
+from tsuzuki.api.deps import State
+from tsuzuki.api.schemas import MeOut
+from tsuzuki.api.visitor import RESTORE_PREFIX, Visitor
+from tsuzuki.storage import find_visitor
 
 router = APIRouter()
 
