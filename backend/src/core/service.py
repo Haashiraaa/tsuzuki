@@ -10,15 +10,15 @@ from functools import partial
 from pathlib import Path
 from typing import TypeVar
 
-from backend.src.core.errors import TsuzukiError
-from backend.src.core.events import EpisodeEvent, EventHandler, SeriesEvent, ignore_events
-from backend.src.core.models import DownloadJob, Episode, MediaSource, Selection, Series
-from backend.src.core.naming import episode_filename, folder_name
-from backend.src.core.report import EpisodeResult, RunReport, SeriesReport
-from backend.src.core.retry import RetryNotice, RetryPolicy, retry_call
-from backend.src.core.selection import select_episodes
-from backend.src.download.base import Downloader
-from backend.src.sites.base import Site
+from tsuzuki.core.errors import TsuzukiError
+from tsuzuki.core.events import EpisodeEvent, EventHandler, SeriesEvent, ignore_events
+from tsuzuki.core.models import DownloadJob, Episode, MediaSource, Selection, Series
+from tsuzuki.core.naming import episode_filename, folder_name
+from tsuzuki.core.report import EpisodeResult, RunReport, SeriesReport
+from tsuzuki.core.retry import RetryNotice, RetryPolicy, retry_call
+from tsuzuki.core.selection import select_episodes
+from tsuzuki.download.base import Downloader
+from tsuzuki.sites.base import Site
 
 T = TypeVar("T")
 R = TypeVar("R")
