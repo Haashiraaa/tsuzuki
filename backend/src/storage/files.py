@@ -9,12 +9,12 @@ import sqlite3
 from datetime import datetime
 from pathlib import Path
 
-from backend.src.core.errors import StorageError
-from backend.src.storage import lifecycle
-from backend.src.storage.database import transaction
-from backend.src.storage.episodes import due_for_expiry, get_episode
-from backend.src.storage.records import EpisodeRecord, EpisodeStatus
-from backend.src.storage.wants import mark_delivered
+from tsuzuki.core.errors import StorageError
+from tsuzuki.storage import lifecycle
+from tsuzuki.storage.database import transaction
+from tsuzuki.storage.episodes import due_for_expiry, get_episode
+from tsuzuki.storage.records import EpisodeRecord, EpisodeStatus
+from tsuzuki.storage.wants import mark_delivered
 
 
 def remove_file(downloads_root: Path, file_path: str | None) -> bool:
