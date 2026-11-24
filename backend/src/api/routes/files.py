@@ -54,8 +54,7 @@ def send_then_deliver(
         while chunk := handle.read(CHUNK_BYTES):
             yield chunk
     with state.database() as conn:
-        confirm_visitor_delivery(
-            conn, state.root.downloads, visitor, episode_id, state.clock())
+        confirm_visitor_delivery(conn, state.root.downloads, visitor, episode_id, state.clock())
 
 
 @router.get("/episodes/{episode_id}/file")
