@@ -24,7 +24,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import NullPool
 
-from backend.src.core.errors import StorageError
+from tsuzuki.core.errors import StorageError
 
 SCRIPTS = Path(__file__).resolve().parent / "migrations"
 
