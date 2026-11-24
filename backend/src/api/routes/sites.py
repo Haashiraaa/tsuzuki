@@ -2,10 +2,10 @@
 
 from fastapi import APIRouter, HTTPException, Response
 
-from backend.src.api.deps import State
-from backend.src.api.ladder import steps_for_url
-from backend.src.api.schemas import SiteOut, SiteTestOut, SiteUrlIn
-from backend.src.sites.registry import known_sites
+from tsuzuki.api.deps import State
+from tsuzuki.api.ladder import steps_for_url
+from tsuzuki.api.schemas import SiteOut, SiteTestOut, SiteUrlIn
+from tsuzuki.sites.registry import known_sites
 
 router = APIRouter()
 
