@@ -4,13 +4,13 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException
 
-from backend.src.api.deps import State
-from backend.src.api.ladder import built_in_steps
-from backend.src.api.schemas import AddSeriesIn, SeriesDetailOut, SeriesOut
-from backend.src.api.views import episode_view, series_view
-from backend.src.api.visitor import RequiredVisitor, Visitor, Writer
-from backend.src.core.errors import LimitError
-from backend.src.storage import (
+from tsuzuki.api.deps import State
+from tsuzuki.api.ladder import built_in_steps
+from tsuzuki.api.schemas import AddSeriesIn, SeriesDetailOut, SeriesOut
+from tsuzuki.api.views import episode_view, series_view
+from tsuzuki.api.visitor import RequiredVisitor, Visitor, Writer
+from tsuzuki.core.errors import LimitError
+from tsuzuki.storage import (
     add_to_library,
     get_series_by_url,
     get_summary,
@@ -23,7 +23,7 @@ from backend.src.storage import (
     transaction,
     upsert_series,
 )
-from backend.src.storage.episodes import count_episodes
+from tsuzuki.storage.episodes import count_episodes
 
 PAGE_SIZE = 12  # episodes shown before "show all"
 
