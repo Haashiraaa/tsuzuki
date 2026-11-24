@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlparse
 
-from backend.src.core.errors import ConfigError, ParseError
+from tsuzuki.core.errors import ConfigError, ParseError
 
 ALLOWED_SCHEMES = ("http", "https")
 
