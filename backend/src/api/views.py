@@ -44,8 +44,7 @@ def series_view(summary: SeriesSummary) -> SeriesOut:
 def episode_view(record: EpisodeRecord, request: RequestRecord | None) -> EpisodeOut:
     """One episode as this visitor sees it: the file is shared, "delivered" is personal."""
     return EpisodeOut(
-        id=record.id, number=record.number, status=view_status(
-            record.status, request).value
+
     )
 
 
@@ -131,8 +130,7 @@ def example_file(ready: list[EpisodeRecord], downloads: Path) -> str:
     for record in ready:
         if record.file_path:
             try:
-                relative = Path(record.file_path).resolve(
-                ).relative_to(downloads.resolve())
+                relative = Path(record.file_path).resolve().relative_to(downloads.resolve())
             except ValueError:
                 continue
             return f"{downloads.name}/{relative.as_posix()}"
