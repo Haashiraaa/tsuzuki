@@ -55,7 +55,7 @@ dev = [
 Repository = "https://github.com/Haashiraaa/tsuzuki"
 
 [project.scripts]
-tsuzuki = "backend.src.cli:main"
+tsuzuki = "tsuzuki.cli:main"
 
 [tool.setuptools]
 package-dir = { "" = "." }
@@ -67,6 +67,7 @@ exclude = ["tests*"]
 
 [tool.setuptools.package-data]
 "backend.src" = ["py.typed"]
+"tsuzuki" = ["py.typed"]
 "backend.src.storage" = [
     "migrations/env.py",
     "migrations/script.py.mako",
@@ -87,7 +88,7 @@ src = ["backend", "."]
 select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["backend", "tests"]
+known-first-party = ["backend", "tests", "tsuzuki"]
 
 [tool.pyright]
 include = ["backend", "scripts", "tests"]
