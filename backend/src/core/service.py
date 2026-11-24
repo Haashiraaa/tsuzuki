@@ -60,8 +60,7 @@ class DownloadRunner:
             self._fill_report(report, url)
         except TsuzukiError as exc:
             report.error = str(exc)
-            self._emit(SeriesEvent("failed", url,
-                       report.title, detail=str(exc)))
+            self._emit(SeriesEvent("failed", url, report.title, detail=str(exc)))
         return report
 
     def _fill_report(self, report: SeriesReport, url: str) -> None:
@@ -80,15 +79,13 @@ class DownloadRunner:
             result = self._fetch_and_download(site, series, episode)
         except (TsuzukiError, OSError) as exc:
             result = EpisodeResult(episode.number, "failed", str(exc))
-        self._emit(EpisodeEvent(result.status, series.title,
-                   episode.number, result.detail))
+        self._emit(EpisodeEvent(result.status, series.title, episode.number, result.detail))
         return result
 
     def _fetch_and_download(self, site: Site, series: Series, episode: Episode) -> EpisodeResult:
         source = self._with_retry(lambda: site.resolve_media(series, episode))
         job = self._build_job(series, episode, source)
-        outcome = self._with_retry(
-            lambda: self._downloader.download(job, self._emit))
+        outcome = self._with_retry(lambda: self._downloader.download(job, self._emit))
         status = "skipped" if outcome == "skipped" else "completed"
         return EpisodeResult(episode.number, status)
 
