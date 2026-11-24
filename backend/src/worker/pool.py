@@ -46,13 +46,11 @@ class WorkerPool:
         conn = connect(self._settings.database)
         try:
             while not self._stop.is_set():
-                record = claim_next(
-                    conn, self._services.clock(), self._settings.retention)
+                record = claim_next(conn, self._services.clock(), self._settings.retention)
                 if record is None:
                     self._stop.wait(self._settings.poll_seconds)
                     continue
-                run_episode(conn, record, self._settings,
-                            self._services, self._stop.is_set)
+                run_episode(conn, record, self._settings, self._services, self._stop.is_set)
         except Exception:
             log.exception("A download slot stopped unexpectedly")
         finally:

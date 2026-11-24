@@ -49,8 +49,7 @@ def open_stream(job: DownloadJob, existing: int) -> requests.Response:
     if existing and response.status_code == RANGE_NOT_SATISFIABLE:
         response.close()
         job.path.unlink(missing_ok=True)
-        raise DownloadError(
-            "Server rejected the resume range; restarting from scratch")
+        raise DownloadError("Server rejected the resume range; restarting from scratch")
     check_status(job, response)
     return response
 
@@ -119,5 +118,4 @@ def verify_size(path: Path, total: int) -> None:
         return
     if size > total:
         path.unlink(missing_ok=True)  # over-long can't be resumed
-    raise DownloadError(
-        f"Incomplete download: expected {total} bytes, got {size}")
+    raise DownloadError(f"Incomplete download: expected {total} bytes, got {size}")

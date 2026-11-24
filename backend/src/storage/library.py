@@ -40,15 +40,13 @@ def summary_from_row(row: sqlite3.Row) -> SeriesSummary:
 
 
 def list_summaries(conn: sqlite3.Connection, visitor_id: int) -> list[SeriesSummary]:
-    rows = conn.execute(
-        SUMMARY_SQL + " ORDER BY s.title COLLATE NOCASE", {"v": visitor_id})
+    rows = conn.execute(SUMMARY_SQL + " ORDER BY s.title COLLATE NOCASE", {"v": visitor_id})
     return [summary_from_row(row) for row in rows.fetchall()]
 
 
 def get_summary(conn: sqlite3.Connection, visitor_id: int, series_id: int) -> SeriesSummary | None:
     """None when the series does not exist or is not in this visitor's library."""
-    row = conn.execute(SUMMARY_SQL + " WHERE s.id = :s",
-                       {"v": visitor_id, "s": series_id})
+    row = conn.execute(SUMMARY_SQL + " WHERE s.id = :s", {"v": visitor_id, "s": series_id})
     found = row.fetchone()
     return summary_from_row(found) if found else None
 
@@ -64,13 +62,11 @@ def add_to_library(
 
 def in_library(conn: sqlite3.Connection, visitor_id: int, series_id: int) -> bool:
     row = conn.execute(
-        "SELECT 1 FROM library WHERE visitor_id = ? AND series_id = ?", (
-            visitor_id, series_id)
+        "SELECT 1 FROM library WHERE visitor_id = ? AND series_id = ?", (visitor_id, series_id)
     ).fetchone()
     return row is not None
 
 
 def library_size(conn: sqlite3.Connection, visitor_id: int) -> int:
-    row = conn.execute(
-        "SELECT COUNT(*) FROM library WHERE visitor_id = ?", (visitor_id,))
+    row = conn.execute("SELECT COUNT(*) FROM library WHERE visitor_id = ?", (visitor_id,))
     return int(row.fetchone()[0])

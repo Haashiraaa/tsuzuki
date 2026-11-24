@@ -27,8 +27,7 @@ def upsert_series(
 
 
 def get_series(conn: sqlite3.Connection, series_id: int) -> SeriesRecord | None:
-    row = conn.execute("SELECT * FROM series WHERE id = ?",
-                       (series_id,)).fetchone()
+    row = conn.execute("SELECT * FROM series WHERE id = ?", (series_id,)).fetchone()
     return series_from_row(row) if row else None
 
 
@@ -38,8 +37,7 @@ def get_series_by_url(conn: sqlite3.Connection, url: str) -> SeriesRecord | None
 
 
 def list_series(conn: sqlite3.Connection) -> list[SeriesRecord]:
-    rows = conn.execute(
-        "SELECT * FROM series ORDER BY title COLLATE NOCASE").fetchall()
+    rows = conn.execute("SELECT * FROM series ORDER BY title COLLATE NOCASE").fetchall()
     return [series_from_row(row) for row in rows]
 
 

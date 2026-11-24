@@ -22,8 +22,7 @@ class RetryPolicy:
 
     def __post_init__(self) -> None:
         if self.attempts < 1:
-            raise ConfigError(
-                f"attempts must be 1 or greater, got {self.attempts}")
+            raise ConfigError(f"attempts must be 1 or greater, got {self.attempts}")
 
 
 def is_retryable(exc: BaseException) -> bool:

@@ -104,8 +104,7 @@ def download(
     site = services.resolve_site(series_record.url)
     series = Series(series_record.title, series_record.url, ())
     episode = Episode(record.number, record.ref)
-    source = retry_call(lambda: site.resolve_media(
-        series, episode), settings.retry)
+    source = retry_call(lambda: site.resolve_media(series, episode), settings.retry)
     job = DownloadJob(
         source,
         settings.downloads / folder_name(series_record.title),
@@ -113,15 +112,13 @@ def download(
     )
 
     plan = services.make_plan(partial(use_built_in, board, record.id))
-    board.update(record.id, done=0, total=0,
-                 method=BUILT_IN if plan.hint else ARIA2)
+    board.update(record.id, done=0, total=0, method=BUILT_IN if plan.hint else ARIA2)
 
     def on_progress(event: ProgressEvent) -> None:
         check_stop(record.id, board, should_stop)
         board.update(record.id, done=event.done, total=event.total)
 
-    retry_call(lambda: plan.downloader.download(
-        job, on_progress), settings.retry)
+    retry_call(lambda: plan.downloader.download(job, on_progress), settings.retry)
     return job.path
 
 
@@ -170,8 +167,7 @@ def discard_partial(
     series = get_series(conn, record.series_id)
     if series is None:
         return
-    path = settings.downloads / \
-        folder_name(series.title) / episode_filename(record.number)
+    path = settings.downloads / folder_name(series.title) / episode_filename(record.number)
     for leftover in (path, path.with_name(path.name + ".aria2")):
         try:
             remove_file(settings.downloads, str(leftover))

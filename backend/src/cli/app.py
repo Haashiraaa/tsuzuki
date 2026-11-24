@@ -35,8 +35,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         logger.error(str(exc))
         return EXIT_FAILURE
     except Exception as exc:  # last-resort boundary: log with traceback, exit cleanly
-        logger.error(
-            f"Unexpected error: {exc}", exception=exc, save_to_json=True, context="cli")
+        logger.error(f"Unexpected error: {exc}", exception=exc, save_to_json=True, context="cli")
         return EXIT_FAILURE
 
 
@@ -64,10 +63,8 @@ def run(args: argparse.Namespace, root: Root, logger: Logger) -> int:
 
 def announce_plan(plan: DownloadPlan, logger: Logger) -> None:
     if plan.hint:
-        logger.warning(
-            "aria2c not found: downloads will be sequential and slower.")
-        logger.warning(
-            f"For faster parallel downloads, install it: {plan.hint}")
+        logger.warning("aria2c not found: downloads will be sequential and slower.")
+        logger.warning(f"For faster parallel downloads, install it: {plan.hint}")
 
 
 def build_runner(

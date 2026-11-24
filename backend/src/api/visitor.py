@@ -36,8 +36,7 @@ def read_cookie(scope: Scope) -> str | None:
 
 
 def cookie_header(token: str, *, secure: bool) -> str:
-    parts = [f"{COOKIE}={token}", "Path=/",
-             f"Max-Age={YEAR_SECONDS}", "HttpOnly", "SameSite=Lax"]
+    parts = [f"{COOKIE}={token}", "Path=/", f"Max-Age={YEAR_SECONDS}", "HttpOnly", "SameSite=Lax"]
     if secure:
         parts.append("Secure")
     return "; ".join(parts)
@@ -73,8 +72,7 @@ class VisitorMiddleware:
             if message["type"] == "http.response.start" and issued:
                 headers = MutableHeaders(scope=message)
                 secure = scope.get("scheme") == "https"
-                headers.append(
-                    "set-cookie", cookie_header(issued, secure=secure))
+                headers.append("set-cookie", cookie_header(issued, secure=secure))
             await send(message)
 
         await self.app(scope, receive, send_with_cookie)

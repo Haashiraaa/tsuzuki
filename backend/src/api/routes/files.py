@@ -33,14 +33,12 @@ def ready_file(state: ApiState, visitor: int, episode_id: int) -> tuple[EpisodeR
     if mine is None or mine.delivered_at is not None:
         raise HTTPException(404, f"Episode {episode_id} is not in your queue")
     if record.status is not EpisodeStatus.READY or not record.file_path:
-        raise HTTPException(
-            409, f"Episode {episode_id} is {record.status.value}, not ready")
+        raise HTTPException(409, f"Episode {episode_id} is {record.status.value}, not ready")
     path = Path(record.file_path).resolve()
     if not path.is_relative_to(state.root.downloads.resolve()):
         raise HTTPException(404, "File not found")
     if not path.is_file():
-        raise HTTPException(
-            GONE, "The file is no longer on the server. Queue it again.")
+        raise HTTPException(GONE, "The file is no longer on the server. Queue it again.")
     return record, path
 
 
@@ -54,8 +52,7 @@ def send_then_deliver(
         while chunk := handle.read(CHUNK_BYTES):
             yield chunk
     with state.database() as conn:
-        confirm_visitor_delivery(
-            conn, state.root.downloads, visitor, episode_id, state.clock())
+        confirm_visitor_delivery(conn, state.root.downloads, visitor, episode_id, state.clock())
 
 
 @router.get("/episodes/{episode_id}/file")

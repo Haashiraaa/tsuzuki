@@ -24,8 +24,7 @@ def remove_file(downloads_root: Path, file_path: str | None) -> bool:
         return False
     target = Path(file_path).resolve()
     if not target.is_relative_to(downloads_root.resolve()):
-        raise StorageError(
-            f"Refusing to delete a file outside the downloads folder: {target}")
+        raise StorageError(f"Refusing to delete a file outside the downloads folder: {target}")
     try:
         target.unlink()
     except FileNotFoundError:
@@ -78,6 +77,5 @@ def sweep_expired(
 
 
 def file_path_of(conn: sqlite3.Connection, episode_id: int) -> str | None:
-    row = conn.execute(
-        "SELECT file_path FROM episodes WHERE id = ?", (episode_id,)).fetchone()
+    row = conn.execute("SELECT file_path FROM episodes WHERE id = ?", (episode_id,)).fetchone()
     return row["file_path"] if row else None

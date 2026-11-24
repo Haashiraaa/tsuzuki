@@ -43,5 +43,4 @@ def find_visitor(conn: sqlite3.Connection, token: str) -> int | None:
 
 
 def touch_visitor(conn: sqlite3.Connection, visitor_id: int, now: datetime) -> None:
-    conn.execute("UPDATE visitors SET last_seen_at = ? WHERE id = ?",
-                 (to_text(now), visitor_id))
+    conn.execute("UPDATE visitors SET last_seen_at = ? WHERE id = ?", (to_text(now), visitor_id))

@@ -73,8 +73,7 @@ class ConsoleReporter:
 
     def _log_series(self, event: SeriesEvent) -> None:
         if event.kind == "found":
-            self._logger.info(
-                f"{event.title}: {event.count} episode(s) selected")
+            self._logger.info(f"{event.title}: {event.count} episode(s) selected")
         else:
             self._logger.error(f"{event.url}: {event.detail}")
 

@@ -20,8 +20,7 @@ BUSY_TIMEOUT_MS = 10_000
 def connect(path: Path | str) -> sqlite3.Connection:
     """A configured connection. ``isolation_level=None`` so ``transaction`` is in charge."""
     try:
-        conn = sqlite3.connect(
-            str(path), timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None)
+        conn = sqlite3.connect(str(path), timeout=BUSY_TIMEOUT_MS / 1000, isolation_level=None)
     except sqlite3.Error as exc:
         raise StorageError(f"Cannot open database {path}: {exc}") from exc
     conn.row_factory = sqlite3.Row
@@ -39,8 +38,7 @@ def configure(conn: sqlite3.Connection) -> None:
 def prepare_database(path: Path | str) -> None:
     """Create the folder if needed and bring the schema up to date. Safe to repeat."""
     if str(path) == ":memory:":
-        raise StorageError(
-            "An in-memory database cannot be migrated; use a file.")
+        raise StorageError("An in-memory database cannot be migrated; use a file.")
     target = Path(path)
     target.parent.mkdir(parents=True, exist_ok=True)
     migrate(target)

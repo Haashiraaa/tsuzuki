@@ -37,21 +37,18 @@ def sync_episodes(
 
 
 def count_episodes(conn: sqlite3.Connection, series_id: int) -> int:
-    row = conn.execute(
-        "SELECT COUNT(*) FROM episodes WHERE series_id = ?", (series_id,)).fetchone()
+    row = conn.execute("SELECT COUNT(*) FROM episodes WHERE series_id = ?", (series_id,)).fetchone()
     return int(row[0])
 
 
 def get_episode(conn: sqlite3.Connection, episode_id: int) -> EpisodeRecord | None:
-    row = conn.execute("SELECT * FROM episodes WHERE id = ?",
-                       (episode_id,)).fetchone()
+    row = conn.execute("SELECT * FROM episodes WHERE id = ?", (episode_id,)).fetchone()
     return episode_from_row(row) if row else None
 
 
 def find_episode(conn: sqlite3.Connection, series_id: int, number: str) -> EpisodeRecord | None:
     row = conn.execute(
-        "SELECT * FROM episodes WHERE series_id = ? AND number = ?", (
-            series_id, number)
+        "SELECT * FROM episodes WHERE series_id = ? AND number = ?", (series_id, number)
     ).fetchone()
     return episode_from_row(row) if row else None
 
@@ -98,6 +95,5 @@ def ready_bytes(conn: sqlite3.Connection) -> int:
 
 
 def count_by_status(conn: sqlite3.Connection) -> dict[EpisodeStatus, int]:
-    rows = conn.execute(
-        "SELECT status, COUNT(*) AS n FROM episodes GROUP BY status").fetchall()
+    rows = conn.execute("SELECT status, COUNT(*) AS n FROM episodes GROUP BY status").fetchall()
     return {EpisodeStatus(row["status"]): row["n"] for row in rows}

@@ -26,8 +26,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-o", "--output", type=Path, help="root folder for Downloads/ and the database"
     )
-    parser.add_argument("--slots", type=int,
-                        default=DEFAULT_SLOTS, help="downloads at once")
+    parser.add_argument("--slots", type=int, default=DEFAULT_SLOTS, help="downloads at once")
     parser.add_argument(
         "--max-open",
         type=int,
@@ -49,10 +48,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def state_from(args: argparse.Namespace) -> ApiState:
-    cap = None if args.max_waiting_gb is None else int(
-        args.max_waiting_gb * GIB)
-    retention = RetentionPolicy(ttl=timedelta(
-        hours=args.keep_hours), max_ready_bytes=cap)
+    cap = None if args.max_waiting_gb is None else int(args.max_waiting_gb * GIB)
+    retention = RetentionPolicy(ttl=timedelta(hours=args.keep_hours), max_ready_bytes=cap)
     limits = Limits(max_open=args.max_open, max_series=args.max_series)
     return ApiState(
         root=resolve_root(args.output), retention=retention, slots=args.slots, limits=limits
@@ -64,8 +61,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         import uvicorn
     except ImportError:
-        print(
-            "The server needs extra packages: pip install 'backend.src[server]'", file=sys.stderr)
+        print("The server needs extra packages: pip install 'backend.src[server]'", file=sys.stderr)
         return 1
     if args.host not in LOOPBACK:
         print(
