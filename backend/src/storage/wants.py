@@ -40,8 +40,7 @@ def request_from_row(row: sqlite3.Row) -> RequestRecord:
 
 def get_request(conn: sqlite3.Connection, visitor_id: int, episode_id: int) -> RequestRecord | None:
     row = conn.execute(
-        "SELECT * FROM requests WHERE visitor_id = ? AND episode_id = ?", (
-            visitor_id, episode_id)
+        "SELECT * FROM requests WHERE visitor_id = ? AND episode_id = ?", (visitor_id, episode_id)
     ).fetchone()
     return request_from_row(row) if row else None
 
@@ -179,6 +178,5 @@ def open_rows(conn: sqlite3.Connection, visitor_id: int) -> list[QueueRow]:
             requested_at=from_text(row["requested_at"]),
             delivered_at=None,
         )
-        result.append(
-            QueueRow(request, episode_from_row(row), row["series_title"]))
+        result.append(QueueRow(request, episode_from_row(row), row["series_title"]))
     return result
