@@ -54,4 +54,4 @@ class TestParse:
         with pytest.raises(SystemExit) as stop:
             parse_args(["--version"])
         assert stop.value.code == 0
-        assert capsys.readouterr().out.startswith("tsuzuki ")
+        assert capsys.readouterr().out.startswith("backend.src ")
