@@ -13,9 +13,9 @@ from fastapi import Depends, HTTPException, Request
 from starlette.datastructures import MutableHeaders
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from backend.src.api.deps import State
-from backend.src.api.state import ApiState
-from backend.src.storage import create_visitor, find_visitor, touch_visitor
+from tsuzuki.api.deps import State
+from tsuzuki.api.state import ApiState
+from tsuzuki.storage import create_visitor, find_visitor, touch_visitor
 
 COOKIE = "tsuzuki_visitor"
 YEAR_SECONDS = 365 * 24 * 60 * 60
