@@ -60,12 +60,10 @@ def move(
         (*changed.values(), episode_id, episode.status.value),
     )
     if cursor.rowcount == 0:
-        raise InvalidTransitionError(
-            f"Episode {episode_id} changed while it was being updated")
+        raise InvalidTransitionError(f"Episode {episode_id} changed while it was being updated")
     updated = get_episode(conn, episode_id)
     if updated is None:
-        raise InvalidTransitionError(
-            f"Episode {episode_id} disappeared while it was updated")
+        raise InvalidTransitionError(f"Episode {episode_id} disappeared while it was updated")
     return updated
 
 
