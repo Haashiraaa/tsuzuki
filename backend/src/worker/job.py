@@ -8,16 +8,16 @@ from datetime import datetime
 from functools import partial
 from pathlib import Path
 
-from backend.src.core.errors import DownloadCancelled, DownloadInterrupted, TsuzukiError
-from backend.src.core.events import ProgressEvent
-from backend.src.core.models import DownloadJob, Episode, Series
-from backend.src.core.naming import episode_filename, folder_name
-from backend.src.core.progress import ProgressBoard
-from backend.src.core.retry import RetryPolicy, retry_call
-from backend.src.download.pipeline import Notice
-from backend.src.download.plan import DownloadPlan, plan_downloads
-from backend.src.sites.base import Site
-from backend.src.storage import (
+from tsuzuki.core.errors import DownloadCancelled, DownloadInterrupted, TsuzukiError
+from tsuzuki.core.events import ProgressEvent
+from tsuzuki.core.models import DownloadJob, Episode, Series
+from tsuzuki.core.naming import episode_filename, folder_name
+from tsuzuki.core.progress import ProgressBoard
+from tsuzuki.core.retry import RetryPolicy, retry_call
+from tsuzuki.download.pipeline import Notice
+from tsuzuki.download.plan import DownloadPlan, plan_downloads
+from tsuzuki.sites.base import Site
+from tsuzuki.storage import (
     EpisodeRecord,
     RetentionPolicy,
     abandon,
@@ -26,9 +26,9 @@ from backend.src.storage import (
     lifecycle,
     transaction,
 )
-from backend.src.storage.files import remove_file
+from tsuzuki.storage.files import remove_file
 
-log = logging.getLogger("backend.src.worker")
+log = logging.getLogger("tsuzuki.worker")
 
 PlanFactory = Callable[[Notice], DownloadPlan]
 BUILT_IN = "Built-in downloader"
