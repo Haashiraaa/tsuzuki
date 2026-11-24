@@ -9,7 +9,7 @@ from backend.src.storage import EpisodeRecord, get_episode
 
 
 def get_state(request: Request) -> ApiState:
-    state: ApiState = request.app.state.backend.src
+    state: ApiState = request.app.state.tsuzuki
     return state
 
 
