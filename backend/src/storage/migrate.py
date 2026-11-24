@@ -50,8 +50,7 @@ def current_revision(database: Path) -> str | None:
         with engine.connect() as connection:
             return MigrationContext.configure(connection).get_current_revision()
     except SQLAlchemyError as exc:
-        raise StorageError(
-            f"Cannot read the database version of {database}: {exc}") from exc
+        raise StorageError(f"Cannot read the database version of {database}: {exc}") from exc
     finally:
         engine.dispose()
 
@@ -66,9 +65,7 @@ def migrate(database: Path, scripts: Path = SCRIPTS) -> str | None:
                 f"{database} was made by a newer version of Tsuzuki. Update Tsuzuki, or use "
                 "a different folder."
             ) from exc
-        raise StorageError(
-            f"Cannot upgrade the database {database}: {exc}") from exc
+        raise StorageError(f"Cannot upgrade the database {database}: {exc}") from exc
     except SQLAlchemyError as exc:
-        raise StorageError(
-            f"Cannot upgrade the database {database}: {exc}") from exc
+        raise StorageError(f"Cannot upgrade the database {database}: {exc}") from exc
     return current_revision(database)
