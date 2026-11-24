@@ -41,5 +41,4 @@ def page_headers(url: str) -> dict[str, str]:
     return {"Referer": origin(url)}
 
 
-ENTRY = SiteEntry(name=AnimeHeavenSite.name, hosts=(
-    "animeheaven.me",), create=AnimeHeavenSite)
+ENTRY = SiteEntry(name=AnimeHeavenSite.name, hosts=("animeheaven.me",), create=AnimeHeavenSite)
