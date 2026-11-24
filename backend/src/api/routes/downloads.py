@@ -56,8 +56,7 @@ def ask_for(
     waiting = open_count(conn, visitor)
     if waiting + len(new) > limit:
         if waiting == 0:
-            raise LimitError(
-                f"You can queue up to {limit} episodes at a time. Pick fewer.")
+
         raise LimitError(
             f"You can have up to {limit} episodes waiting at once and already have {waiting}. "
             "Save or cancel some, then try again."
@@ -72,10 +71,7 @@ def ask_for(
 def queue_episodes(body: QueueEpisodesIn, state: State, visitor: Writer) -> Response:
     with state.database() as conn:
         if not in_library(conn, visitor, body.series_id):
-            raise HTTPException(
-                404, f"Series {body.series_id} is not in your library")
-        ask_for(state, conn, visitor, body.episode_ids,
-                series_id=body.series_id)
+
     return Response(status_code=NO_CONTENT)
 
 
@@ -93,8 +89,7 @@ def retry(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
     with state.database() as conn:
         mine = get_request(conn, visitor, episode_id)
         if view_status(episode.status, mine) not in REQUESTABLE_VIEW:
-            raise InvalidTransitionError(
-                f"Episode {episode_id} is {episode.status.value}")
+
         ask_for(state, conn, visitor, [episode_id])
     return Response(status_code=NO_CONTENT)
 
@@ -119,5 +114,4 @@ def cancel(episode_id: int, state: State, visitor: RequiredVisitor) -> Response:
 
 @router.post("/episodes/{episode_id}/pause")
 def pause(episode_id: int) -> Response:
-    raise HTTPException(
-        501, "Pausing is not supported yet. Cancel it and queue it again.")
+    raise HTTPException(501, "Pausing is not supported yet. Cancel it and queue it again.")
