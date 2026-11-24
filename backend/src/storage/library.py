@@ -7,9 +7,9 @@ the counts: "downloaded" means episodes *this* visitor saved (or can save right 
 import sqlite3
 from datetime import datetime
 
-from backend.src.storage.records import SeriesSummary
-from backend.src.storage.rows import series_from_row
-from backend.src.storage.times import to_text
+from tsuzuki.storage.records import SeriesSummary
+from tsuzuki.storage.rows import series_from_row
+from tsuzuki.storage.times import to_text
 
 # Counts for one visitor's view of each series in their library. Episode totals are shared;
 # everything else comes from this visitor's own requests.
