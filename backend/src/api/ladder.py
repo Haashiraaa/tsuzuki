@@ -4,9 +4,9 @@ Only the built-in adapters exist so far. The other rungs (saved profiles, generi
 yt-dlp, AI repair) are reported honestly as not built yet.
 """
 
-from backend.src.api.schemas import StepOut
-from backend.src.net.urls import hostname
-from backend.src.sites.registry import known_sites
+from tsuzuki.api.schemas import StepOut
+from tsuzuki.net.urls import hostname
+from tsuzuki.sites.registry import known_sites
 
 NOT_BUILT = "Not built yet."
 
