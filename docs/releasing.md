@@ -56,23 +56,24 @@ never fails the build; a message in the wrong form is simply left out of the cha
    merge the release pull request by bypassing the check.
 3. **Protect `main`** (below).
 
-## First release
+## Next release after the restructure
 
-`release-please-config.json` has a `bootstrap-sha`: the commit from which history is counted
-(the head of `main` before the restructure). Commits before it are ignored. The manifest says
-the current version is `0.2.1`, which matches the existing `v0.2.1` tag.
-
-The restructure into Tsuzuki changes the command name (`anime` → `tsuzuki`) and the Python
-package, so it is a breaking change. **Squash-merge it with one conventional title**, for
-example:
+The current manifest and latest changelog entry both identify **0.9.0** as the released version.
+The restructure is a breaking change because it changes the internal package layout and
+application entry points. Propose the refactor to `main` with a conventional squash title such as:
 
 ```
-feat!: rename to tsuzuki and restructure into feature packages
+feat!: restructure the backend into feature packages
 ```
 
-release-please will then propose `0.3.0` (breaking changes bump the minor number before 1.0).
-Commits that are not in conventional form are ignored rather than failing anything. Do not
-rewrite already-pushed history to fix a message.
+After that pull request is squash-merged into `main`, the Release workflow should open a
+release pull request for **0.10.0** (breaking changes bump the minor number before 1.0).
+Review the generated changelog and version bump in that automated pull request, then merge it
+when ready to ship. Do not create the release tag or edit the version by hand.
+
+The `bootstrap-sha` remains the point from which release-please reads history; the manifest
+(`.release-please-manifest.json`) and latest changelog entry are the source of the current
+released version.
 
 ## Protecting `main`
 

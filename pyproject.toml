@@ -79,6 +79,8 @@ addopts = "-ra"
 line-length = 100
 target-version = "py310"
 src = ["backend/src", "."]
+# Not Python source we own: the web app (Node), and local run output. Applies to lint and format.
+extend-exclude = ["frontend", "Downloads", "logs"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
@@ -89,4 +91,5 @@ known-first-party = ["tsuzuki", "tests"]
 [tool.pyright]
 include = ["backend/src", "scripts", "tests"]
 strict = ["backend/src"]
+exclude = ["**/node_modules", "**/__pycache__", "frontend", "Downloads", "logs", "build", "dist"]
 pythonVersion = "3.10"
