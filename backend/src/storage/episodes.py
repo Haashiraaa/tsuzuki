@@ -4,9 +4,9 @@ import sqlite3
 from collections.abc import Iterable, Sequence
 from datetime import datetime
 
-from backend.src.storage.records import EpisodeRecord, EpisodeStatus
-from backend.src.storage.rows import episode_from_row
-from backend.src.storage.times import to_text
+from tsuzuki.storage.records import EpisodeRecord, EpisodeStatus
+from tsuzuki.storage.rows import episode_from_row
+from tsuzuki.storage.times import to_text
 
 
 def ordinal_for(number: str, position: int) -> float:
