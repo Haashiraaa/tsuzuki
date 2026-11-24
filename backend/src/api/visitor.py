@@ -17,7 +17,7 @@ from tsuzuki.api.deps import State
 from tsuzuki.api.state import ApiState
 from tsuzuki.storage import create_visitor, find_visitor, touch_visitor
 
-COOKIE = "tsuzuki_visitor"
+COOKIE = "backend.src_visitor"
 YEAR_SECONDS = 365 * 24 * 60 * 60
 RESTORE_PREFIX = "/api/restore/"
 
