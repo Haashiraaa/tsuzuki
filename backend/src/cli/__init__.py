@@ -1,5 +1,5 @@
 """Command-line front-end."""
 
-from backend.src.cli.app import main
+from tsuzuki.cli.app import main
 
 __all__ = ["main"]
