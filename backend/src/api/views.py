@@ -44,7 +44,7 @@ def series_view(summary: SeriesSummary) -> SeriesOut:
 def episode_view(record: EpisodeRecord, request: RequestRecord | None) -> EpisodeOut:
     """One episode as this visitor sees it: the file is shared, "delivered" is personal."""
     return EpisodeOut(
-
+        id=record.id, number=record.number, status=view_status(record.status, request).value
     )
 
 
@@ -77,16 +77,13 @@ def queue_view(
         if episode.status is S.DOWNLOADING:
             active.append(active_view(episode, name, board))
         elif episode.status is S.QUEUED:
-            waiting.append(WaitingOut(id=episode.id, name=name,
-                           note=WAITING_NOTE, failed=False))
+            waiting.append(WaitingOut(id=episode.id, name=name, note=WAITING_NOTE, failed=False))
         elif episode.status is S.FAILED:
             waiting.append(
-                WaitingOut(id=episode.id, name=name,
-                           note=failure_note(episode), failed=True)
+                WaitingOut(id=episode.id, name=name, note=failure_note(episode), failed=True)
             )
         elif episode.status is S.EXPIRED:
-            waiting.append(WaitingOut(id=episode.id, name=name,
-                           note=EXPIRED_NOTE, failed=True))
+            waiting.append(WaitingOut(id=episode.id, name=name, note=EXPIRED_NOTE, failed=True))
         elif episode.status is S.READY:
             finished.append(FinishedOut(id=episode.id, name=name))
             ready.append(episode)
