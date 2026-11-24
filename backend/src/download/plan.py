@@ -2,11 +2,11 @@
 
 from dataclasses import dataclass
 
-from backend.src.download.aria2 import Aria2Downloader, is_available
-from backend.src.download.base import Downloader
-from backend.src.download.hint import aria2_install_hint
-from backend.src.download.pipeline import FallbackDownloader, Notice, ignore_notice
-from backend.src.download.stream import StreamDownloader
+from tsuzuki.download.aria2 import Aria2Downloader, is_available
+from tsuzuki.download.base import Downloader
+from tsuzuki.download.hint import aria2_install_hint
+from tsuzuki.download.pipeline import FallbackDownloader, Notice, ignore_notice
+from tsuzuki.download.stream import StreamDownloader
 
 
 @dataclass(frozen=True)
