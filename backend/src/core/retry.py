@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import TypeVar
 
-from backend.src.core.errors import ConfigError, TsuzukiError
+from tsuzuki.core.errors import ConfigError, TsuzukiError
 
 T = TypeVar("T")
 
