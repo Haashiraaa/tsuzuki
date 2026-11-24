@@ -2,8 +2,8 @@
 
 from collections.abc import Sequence
 
-from backend.src.core.errors import EpisodeNotFoundError
-from backend.src.core.models import Episode, Selection
+from tsuzuki.core.errors import EpisodeNotFoundError
+from tsuzuki.core.models import Episode, Selection
 
 
 def select_episodes(episodes: Sequence[Episode], selection: Selection) -> list[Episode]:
