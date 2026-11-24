@@ -17,7 +17,7 @@ from backend.src.api.deps import State
 from backend.src.api.state import ApiState
 from backend.src.storage import create_visitor, find_visitor, touch_visitor
 
-COOKIE = "backend.src_visitor"
+COOKIE = "tsuzuki_visitor"
 YEAR_SECONDS = 365 * 24 * 60 * 60
 RESTORE_PREFIX = "/api/restore/"
 
