@@ -27,8 +27,7 @@ def plan_downloads(
     present = is_available() if aria2_present is None else aria2_present
     if present:
         downloader = FallbackDownloader(
-            Aria2Downloader(
-                capture_progress=capture_progress), StreamDownloader(), notice
+            Aria2Downloader(capture_progress=capture_progress), StreamDownloader(), notice
         )
         return DownloadPlan(downloader, requested_workers)
     return DownloadPlan(
